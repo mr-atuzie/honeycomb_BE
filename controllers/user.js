@@ -122,7 +122,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   if (!checkPassword) {
     res.status(400);
-    throw new Error("Incorrect password");
+    throw new Error("Incorrect email or password");
   }
 
   //Generate Token
@@ -191,8 +191,80 @@ const addDocument = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
+const updateUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    const user = await User.findByIdAndUpdate(req.user._id, req.body, {
+      new: true,
+    });
+
+    res.status(200).json({
+      user,
+    });
+  } else {
+    res.status(400);
+    throw new Error("User not found");
+  }
+});
+
+const loginStatus = asyncHandler(async (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.json(false);
+  }
+
+  const verified = jwt.verify(token, process.env.JWT_SECRET);
+
+  if (verified) {
+    return res.json(true);
+  } else {
+    return res.json(fasle);
+  }
+});
+
+const uploadPicture = asyncHandler(async (req, res) => {
+  let fileData = {};
+
+  if (req.file) {
+    let uploadedFile;
+
+    try {
+      uploadedFile = await cloudinary.uploader.upload(req.file.path, {
+        folder: "Houses",
+        resource_type: "image",
+      });
+    } catch (error) {
+      res.status(500);
+      res.send(error);
+      throw new Error("Unable to upload image, Please try again.");
+    }
+
+    fileData = {
+      fileName: req.file.originalname,
+      filePath: uploadedFile.secure_url,
+      fileType: req.file.mimetype,
+      fileSize: fileSizeFormatter(req.file.size),
+    };
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { photo: fileData.filePath } },
+    {
+      new: true,
+    }
+  );
+
+  res.status(200).json(user);
+});
+
 module.exports = {
   registerUser,
   loginUser,
   addDocument,
+  updateUser,
+  loginStatus,
+  uploadPicture,
 };

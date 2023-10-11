@@ -12,4 +12,12 @@ router
   .route("/add-kyc")
   .put(protect, upload.single("image"), userController.addDocument);
 
+router.route("/login-status").get(userController.loginStatus);
+
+router
+  .route("/upload-picture")
+  .put(protect, upload.single("image"), userController.uploadPicture);
+
+router.route("/update-user").patch(protect, userController.updateUser);
+
 module.exports = router;

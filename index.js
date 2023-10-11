@@ -5,8 +5,8 @@ const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 
-const errorHandler = require("./middlewares/errorMiddleware");
 const path = require("path");
 
 const userRoutes = require("./routes/user");
@@ -48,6 +48,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/user", userRoutes);
 
 //Error Middleware
+app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 8000;
