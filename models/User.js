@@ -2,10 +2,15 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    fistname: {
       type: String,
       trim: true,
-      required: [true, "Please enter your name"],
+      required: [true, "Please enter your firstname"],
+    },
+    lastname: {
+      type: String,
+      trim: true,
+      required: [true, "Please enter your lastname"],
     },
     email: {
       type: String,
@@ -23,12 +28,28 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minLength: [6, "Password must be up to 6 characters"],
     },
-    photo: {
+    accountNumber: {
       type: String,
-      default: "",
+      trim: true,
+      minLength: [10, "Password must be up to 10 characters"],
+    },
+    accountBalance: {
+      type: Number,
+      default: 0,
+    },
+    intrest: {
+      type: Number,
+      default: 0,
     },
     document: {
       type: Object,
+    },
+    kycStatus: {
+      type: String,
+    },
+    admin: {
+      type: Boolean,
+      default: false,
     },
     DOB: {
       type: String,

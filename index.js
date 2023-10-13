@@ -4,12 +4,13 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-const morgan = require("morgan");
+// const morgan = require("morgan");
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 
 const path = require("path");
 
 const userRoutes = require("./routes/user");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(morgan("dev"));
+// app.use(morgan("dev"));
 app.use(
   cors({
     origin: ["http://localhost:3000", "https://honey-comb-fxd.netlify.app"],
@@ -46,6 +47,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 //Error Middleware
 app.use(notFound);
