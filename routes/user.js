@@ -16,6 +16,8 @@ router.route("/login-status").get(userController.loginStatus);
 
 router.route("/update-user").patch(protect, userController.updateUser);
 
+router.route("/").get(protect, userController.getUser);
+
 router.route("/invest").post(protect, userController.invest);
 
 router

@@ -7,6 +7,12 @@ const transactionSchema = new mongoose.Schema(
       required: true,
       ref: "user",
     },
+    name: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
     type: {
       type: String,
     },

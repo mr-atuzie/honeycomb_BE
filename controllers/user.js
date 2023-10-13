@@ -259,8 +259,13 @@ const invest = asyncHandler(async (req, res) => {
       new: true,
     }
   );
+
+  const name = `${user.firstname} ${user.lastname}`;
+
   const transaction = await Transaction.create({
     userId: user._id,
+    name,
+    email: user.email,
     type,
     amount,
     date: Date.now(),
@@ -269,7 +274,7 @@ const invest = asyncHandler(async (req, res) => {
   });
 
   if (transaction) {
-    res.status(201).json("Transaction successful");
+    res.status(201).json(transaction);
   } else {
     res.status(400);
     throw new Error("Transaction failed");
@@ -297,6 +302,17 @@ const getNotifications = asyncHandler(async (req, res) => {
   res.status(201).json({ result: notifications.length, notifications });
 });
 
+const getUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  res.status(200).json(user);
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -306,4 +322,5 @@ module.exports = {
   invest,
   transactionHistory,
   getNotifications,
+  getUser,
 };
