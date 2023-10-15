@@ -154,9 +154,9 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const addDocument = asyncHandler(async (req, res) => {
-  const { idType, idNumber } = req.body;
+  const { idType } = req.body;
 
-  if (!idType || !idNumber) {
+  if (!idType) {
     res.status(400);
     throw new Error("Please fill up all required fields.");
   }
@@ -176,6 +176,7 @@ const addDocument = asyncHandler(async (req, res) => {
       res.send(error);
       throw new Error("Unable to upload image, Please try again.");
     }
+
     fileData = {
       fileName: req.file.originalname,
       filePath: uploadedFile.secure_url,
@@ -188,7 +189,7 @@ const addDocument = asyncHandler(async (req, res) => {
     req.user._id,
     {
       $set: {
-        document: { idType, idNumber, image: fileData },
+        document: { idType, image: fileData.filePath },
         kycStatus: "pending",
       },
     },

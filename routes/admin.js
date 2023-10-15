@@ -14,6 +14,8 @@ router
 
 router.route("/all-users").get(protect, isAdmin, adminController.getAllUsers);
 
+router.route("/user/:id").get(protect, isAdmin, adminController.getUser);
+
 router
   .route("/approve-kyc/:id")
   .get(protect, isAdmin, adminController.approveKyc);

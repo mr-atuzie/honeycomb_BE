@@ -15,6 +15,17 @@ const getAllUsers = asyncHandler(async (req, res) => {
   res.status(201).json({ result: users.length, users });
 });
 
+const getUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  res.status(201).json(user);
+});
+
 const getAllPendingKyc = asyncHandler(async (req, res) => {
   const users = await User.find({ kycStatus: "pending" }).sort("-createdAt");
 
@@ -113,4 +124,5 @@ module.exports = {
   getAllPendingKyc,
   getAllUsers,
   getAllTransactions,
+  getUser,
 };

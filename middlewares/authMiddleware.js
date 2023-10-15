@@ -29,8 +29,8 @@ const protect = asyncHandler(async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(401);
-    throw new Error("Invalid token,Please login.");
+    res.status(500);
+    throw new Error("Network error....");
   }
 });
 
