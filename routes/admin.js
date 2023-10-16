@@ -28,6 +28,14 @@ router
   .route("/add-notification")
   .post(protect, isAdmin, adminController.addNotification);
 
+router.route("/hero").put(protect, isAdmin, adminController.heroContent);
+
+router.route("/about").put(protect, isAdmin, adminController.aboutContent);
+
+router.route("/service").put(protect, isAdmin, adminController.serviceContent);
+
+router.route("/payout/:id").post(protect, isAdmin, adminController.payout);
+
 router
   .route("/update-notification/:id")
   .put(protect, isAdmin, adminController.updateNotification);

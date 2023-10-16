@@ -1,3 +1,4 @@
+const Content = require("../models/Content");
 const Notification = require("../models/Notification");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
@@ -115,6 +116,140 @@ const updateNotification = asyncHandler(async (req, res) => {
   res.status(201).json(newNotification);
 });
 
+const heroContent = asyncHandler(async (req, res) => {
+  const { title, desc } = req.body;
+
+  if (!title || !desc) {
+    res.status(400);
+    throw new Error("Please fill up all required fields.");
+  }
+
+  const content = await Content.findByIdAndUpdate(
+    "652c8c7a7ba8c309c3c8c005",
+
+    {
+      $set: { hero: req.body },
+    },
+
+    {
+      new: true,
+    }
+  );
+
+  if (content) {
+    res.status(201).json(content);
+  } else {
+    res.status(400);
+    throw new Error("Unsuccessful, Please try again");
+  }
+});
+
+const aboutContent = asyncHandler(async (req, res) => {
+  const { title, desc } = req.body;
+
+  if (!title || !desc) {
+    res.status(400);
+    throw new Error("Please fill up all required fields.");
+  }
+
+  const content = await Content.findByIdAndUpdate(
+    "652c8c7a7ba8c309c3c8c005",
+
+    {
+      $set: { about: req.body },
+    },
+
+    {
+      new: true,
+    }
+  );
+
+  if (content) {
+    res.status(201).json(content);
+  } else {
+    res.status(400);
+    throw new Error("Unsuccessful, Please try again");
+  }
+});
+
+const serviceContent = asyncHandler(async (req, res) => {
+  const { title, desc } = req.body;
+
+  if (!title || !desc) {
+    res.status(400);
+    throw new Error("Please fill up all required fields.");
+  }
+
+  const content = await Content.findByIdAndUpdate(
+    "652c8c7a7ba8c309c3c8c005",
+
+    {
+      $set: { service: req.body },
+    },
+
+    {
+      new: true,
+    }
+  );
+
+  if (content) {
+    res.status(201).json(content);
+  } else {
+    res.status(400);
+    throw new Error("Unsuccessful, Please try again");
+  }
+});
+
+const payout = asyncHandler(async (req, res) => {
+  const payee = await User.findById(req.params.id);
+  const payer = await User.findById(req.user._id);
+
+  const { amount, type } = req.body;
+
+  if (!payee) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  if (!amount || !type) {
+    res.status(400);
+    throw new Error("Unable to complete transaction");
+  }
+
+  const oldBalance = payee.accountBalance;
+  const currentBalance = payee.accountBalance - amount;
+
+  const newUser = await User.findByIdAndUpdate(
+    payee._id,
+    {
+      $set: { accountBalance: currentBalance },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const name = `${payer.firstname} ${payer.lastname}`;
+
+  const transaction = await Transaction.create({
+    userId: payee._id,
+    name,
+    email: payer.email,
+    type,
+    amount,
+    date: Date.now(),
+    currentBalance: newUser.accountBalance,
+    oldBalance,
+  });
+
+  if (transaction) {
+    res.status(201).json(transaction);
+  } else {
+    res.status(400);
+    throw new Error("Transaction failed");
+  }
+});
+
 module.exports = {
   updateNotification,
   deleteNotification,
@@ -125,4 +260,8 @@ module.exports = {
   getAllUsers,
   getAllTransactions,
   getUser,
+  heroContent,
+  aboutContent,
+  serviceContent,
+  payout,
 };
