@@ -14,6 +14,24 @@ const generateToken = (id, username) => {
   return jwt.sign({ id, username }, process.env.JWT_SECRET);
 };
 
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const d = new Date();
+let month = months[d.getMonth()];
+
 const registerUser = asyncHandler(async (req, res) => {
   const { firstname, lastname, email, password } = req.body;
 
@@ -44,6 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
     firstname,
     lastname,
     email,
+    month,
     password: hashPassword,
   });
 
@@ -203,11 +222,56 @@ const addDocument = asyncHandler(async (req, res) => {
 
 const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
+  const {
+    firstname,
+    lastname,
+    email,
+    address,
+    DOB,
+    phone,
+    accountNumber,
+    bank,
+  } = req.body;
+
+  if (
+    !firstname ||
+    !lastname ||
+    !email ||
+    !address ||
+    !DOB ||
+    !phone ||
+    !accountNumber ||
+    !bank
+  ) {
+    res.status(400);
+    throw new Error("Please fill up all required fields.");
+  }
+
+  //Check password length
+  if (accountNumber.length < 10) {
+    res.status(400);
+    throw new Error("incorrect account Number");
+  }
 
   if (user) {
-    const user = await User.findByIdAndUpdate(req.user._id, req.body, {
-      new: true,
-    });
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          firstname,
+          lastname,
+          email,
+          DOB,
+          address,
+          phone,
+          accountNumber,
+          bank,
+        },
+      },
+      {
+        new: true,
+      }
+    );
 
     res.status(200).json({
       user,
@@ -267,11 +331,13 @@ const invest = asyncHandler(async (req, res) => {
     userId: user._id,
     name,
     email: user.email,
-    type,
+    type: "credit",
+    plan: type,
     amount,
     date: Date.now(),
     currentBalance: newUser.accountBalance,
     oldBalance,
+    month,
   });
 
   if (transaction) {
@@ -314,6 +380,62 @@ const getUser = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
+const filterTransactionsByMonth = asyncHandler(async (req, res) => {
+  const { month } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  if (!month) {
+    res.status(400);
+    throw new Error("Please enter month");
+  }
+
+  const transactions = await Transaction.find({ userId: user._id, month });
+
+  res.status(201).json(transactions);
+});
+
+const uploadPicture = asyncHandler(async (req, res) => {
+  let fileData = {};
+
+  if (req.file) {
+    let uploadedFile;
+
+    try {
+      uploadedFile = await cloudinary.uploader.upload(req.file.path, {
+        folder: "Houses",
+        resource_type: "image",
+      });
+    } catch (error) {
+      res.status(500);
+      res.send(error);
+      throw new Error("Unable to upload image, Please try again.");
+    }
+
+    fileData = {
+      fileName: req.file.originalname,
+      filePath: uploadedFile.secure_url,
+      fileType: req.file.mimetype,
+      fileSize: fileSizeFormatter(req.file.size),
+    };
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { photo: fileData.filePath } },
+    {
+      new: true,
+    }
+  );
+
+  res.status(200).json(user);
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -324,4 +446,6 @@ module.exports = {
   transactionHistory,
   getNotifications,
   getUser,
+  filterTransactionsByMonth,
+  uploadPicture,
 };

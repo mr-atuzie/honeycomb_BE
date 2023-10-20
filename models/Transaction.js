@@ -16,6 +16,9 @@ const transactionSchema = new mongoose.Schema(
     type: {
       type: String,
     },
+    plan: {
+      type: String,
+    },
     amount: {
       type: Number,
     },
@@ -27,6 +30,10 @@ const transactionSchema = new mongoose.Schema(
     },
     oldBalance: {
       type: Number,
+    },
+    month: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true }

@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
     accountNumber: {
       type: String,
       trim: true,
-      minLength: [10, "Password must be up to 10 characters"],
+      minLength: [10, "account number must be up to 10 characters"],
     },
     accountBalance: {
       type: Number,
@@ -48,6 +48,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    photo: {
+      type: String,
+      default: "",
+    },
+    referrals: {
+      type: Array,
+    },
     admin: {
       type: Boolean,
       default: false,
@@ -59,6 +66,17 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       default: "",
+    },
+    address: {
+      type: String,
+      default: "",
+    },
+    bank: {
+      type: String,
+      default: "",
+    },
+    month: {
+      type: String,
     },
   },
   { timestamps: true }

@@ -235,7 +235,8 @@ const payout = asyncHandler(async (req, res) => {
     userId: payee._id,
     name,
     email: payer.email,
-    type,
+    type: "withdrawal",
+    plan: type,
     amount,
     date: Date.now(),
     currentBalance: newUser.accountBalance,
@@ -248,6 +249,47 @@ const payout = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Transaction failed");
   }
+});
+
+const filterUserByMonth = asyncHandler(async (req, res) => {
+  const { month } = req.body;
+
+  if (!month) {
+    res.status(400);
+    throw new Error("Please enter month");
+  }
+
+  const users = await User.find({ month });
+
+  res.status(201).json({ result: users.length, users });
+});
+
+const filterTransactionsByMonth = asyncHandler(async (req, res) => {
+  const { month } = req.body;
+
+  if (!month) {
+    res.status(400);
+    throw new Error("Please enter month");
+  }
+
+  const transactions = await Transaction.find({ month });
+
+  res.status(201).json(transactions);
+});
+
+const userTransactionHistory = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  const transactions = await Transaction.find({
+    userId: user._id,
+  }).sort("-createdAt");
+
+  res.status(201).json({ result: transactions.length, transactions });
 });
 
 module.exports = {
@@ -264,4 +306,7 @@ module.exports = {
   aboutContent,
   serviceContent,
   payout,
+  filterTransactionsByMonth,
+  filterUserByMonth,
+  userTransactionHistory,
 };

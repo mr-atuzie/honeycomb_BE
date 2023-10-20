@@ -17,6 +17,14 @@ router.route("/all-users").get(protect, isAdmin, adminController.getAllUsers);
 router.route("/user/:id").get(protect, isAdmin, adminController.getUser);
 
 router
+  .route("/filter-transactions-month")
+  .post(protect, isAdmin, adminController.filterTransactionsByMonth);
+
+router
+  .route("/filter-user-month")
+  .post(protect, isAdmin, adminController.filterUserByMonth);
+
+router
   .route("/approve-kyc/:id")
   .get(protect, isAdmin, adminController.approveKyc);
 
@@ -39,6 +47,10 @@ router.route("/payout/:id").post(protect, isAdmin, adminController.payout);
 router
   .route("/update-notification/:id")
   .put(protect, isAdmin, adminController.updateNotification);
+
+router
+  .route("/transaction-history/:id")
+  .get(protect, isAdmin, adminController.userTransactionHistory);
 
 router
   .route("/delete-notification/:id")
