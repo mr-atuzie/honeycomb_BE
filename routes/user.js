@@ -24,9 +24,13 @@ router.route("/").get(protect, userController.getUser);
 
 router.route("/invest").post(protect, userController.invest);
 
+router.route("/withdraw").post(protect, userController.withdraw);
+
 router
   .route("/transaction-history")
   .get(protect, userController.transactionHistory);
+
+router.route("/user-withraws").get(protect, userController.transactionHistory);
 
 router
   .route("/filter-transactions-month")

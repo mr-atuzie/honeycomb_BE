@@ -9,6 +9,7 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const Transaction = require("../models/Transaction");
 const Notification = require("../models/Notification");
+const Withdraw = require("../models/Withdraw");
 
 const generateToken = (id, username) => {
   return jwt.sign({ id, username }, process.env.JWT_SECRET);
@@ -348,6 +349,49 @@ const invest = asyncHandler(async (req, res) => {
   }
 });
 
+const withdraw = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const { amount } = req.body;
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  if (!amount) {
+    res.status(400);
+    throw new Error("Unable to complete transaction");
+  }
+
+  if (amount < 10) {
+    res.status(400);
+    throw new Error("Please enter a valid amount");
+  }
+
+  if (user.accountBalance <= 0 || amount > user.accountBalance) {
+    res.status(400);
+    throw new Error("Insufficient funds");
+  }
+
+  const name = `${user.firstname} ${user.lastname}`;
+
+  const transaction = await Withdraw.create({
+    userId: user._id,
+    name,
+    email: user.email,
+    amount,
+    date: Date.now(),
+    status: "pending",
+  });
+
+  if (transaction) {
+    res.status(201).json(transaction);
+  } else {
+    res.status(400);
+    throw new Error("Transaction failed");
+  }
+});
+
 const transactionHistory = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -357,6 +401,21 @@ const transactionHistory = asyncHandler(async (req, res) => {
   }
 
   const transactions = await Transaction.find({
+    userId: user._id,
+  }).sort("-createdAt");
+
+  res.status(201).json({ result: transactions.length, transactions });
+});
+
+const userWithdrawals = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  const transactions = await Withdraw.find({
     userId: user._id,
   }).sort("-createdAt");
 
@@ -443,9 +502,11 @@ module.exports = {
   updateUser,
   loginStatus,
   invest,
+  withdraw,
   transactionHistory,
   getNotifications,
   getUser,
   filterTransactionsByMonth,
   uploadPicture,
+  userWithdrawals,
 };

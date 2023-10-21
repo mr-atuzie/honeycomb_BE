@@ -13,6 +13,10 @@ router
   .get(protect, isAdmin, adminController.getAllPendingKyc);
 
 router
+  .route("/pending-withdraws")
+  .get(protect, isAdmin, adminController.getAllPendingWithdraws);
+
+router
   .route("/total-investment")
   .get(protect, isAdmin, adminController.totalInvestments);
 

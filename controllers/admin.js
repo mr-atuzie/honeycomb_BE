@@ -3,6 +3,7 @@ const Notification = require("../models/Notification");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
+const Withdraw = require("../models/Withdraw");
 
 const getAllTransactions = asyncHandler(async (req, res) => {
   const transactions = await Transaction.find({}).sort("-createdAt");
@@ -31,6 +32,14 @@ const getAllPendingKyc = asyncHandler(async (req, res) => {
   const users = await User.find({ kycStatus: "pending" }).sort("-createdAt");
 
   res.status(201).json({ result: users.length, users });
+});
+
+const getAllPendingWithdraws = asyncHandler(async (req, res) => {
+  const withdraws = await Withdraw.find({ status: "pending" }).sort(
+    "-createdAt"
+  );
+
+  res.status(201).json({ result: withdraws.length, withdraws });
 });
 
 const approveKyc = asyncHandler(async (req, res) => {
@@ -399,6 +408,7 @@ module.exports = {
   disapproveKyc,
   approveKyc,
   getAllPendingKyc,
+  getAllPendingWithdraws,
   getAllUsers,
   getAllTransactions,
   getUser,
