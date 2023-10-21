@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    referralBonus: {
+      type: Number,
+      default: 0,
+    },
     intrest: {
       type: Number,
       default: 0,

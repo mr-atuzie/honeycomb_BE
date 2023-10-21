@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 
 const contentSchema = new mongoose.Schema(
   {
-    hero: { type: Object },
-    about: { type: Object },
-    service: { type: Object },
+    hero: { type: String },
+    about: { type: String },
+    how: { type: String },
+    value: { type: String },
   },
   { timestamps: true }
 );

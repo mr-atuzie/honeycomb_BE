@@ -12,6 +12,18 @@ router
   .route("/pending-kyc")
   .get(protect, isAdmin, adminController.getAllPendingKyc);
 
+router
+  .route("/total-investment")
+  .get(protect, isAdmin, adminController.totalInvestments);
+
+router
+  .route("/total-intrest")
+  .get(protect, isAdmin, adminController.totalIntrest);
+
+router
+  .route("/total-referrals")
+  .get(protect, isAdmin, adminController.totalReferrals);
+
 router.route("/all-users").get(protect, isAdmin, adminController.getAllUsers);
 
 router.route("/user/:id").get(protect, isAdmin, adminController.getUser);
@@ -28,6 +40,8 @@ router
   .route("/approve-kyc/:id")
   .get(protect, isAdmin, adminController.approveKyc);
 
+router.route("/get").get(protect, isAdmin, adminController.search);
+
 router
   .route("/disapprove-kyc/:id")
   .get(protect, isAdmin, adminController.disapproveKyc);
@@ -36,11 +50,15 @@ router
   .route("/add-notification")
   .post(protect, isAdmin, adminController.addNotification);
 
+router.route("/content").get(protect, isAdmin, adminController.getContent);
+
 router.route("/hero").put(protect, isAdmin, adminController.heroContent);
 
 router.route("/about").put(protect, isAdmin, adminController.aboutContent);
 
-router.route("/service").put(protect, isAdmin, adminController.serviceContent);
+router.route("/how").put(protect, isAdmin, adminController.howContent);
+
+router.route("/value").put(protect, isAdmin, adminController.valueContent);
 
 router.route("/payout/:id").post(protect, isAdmin, adminController.payout);
 

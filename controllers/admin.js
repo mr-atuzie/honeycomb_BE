@@ -116,10 +116,18 @@ const updateNotification = asyncHandler(async (req, res) => {
   res.status(201).json(newNotification);
 });
 
-const heroContent = asyncHandler(async (req, res) => {
-  const { title, desc } = req.body;
+const getContent = asyncHandler(async (req, res) => {
+  const content = await Content.findById("652c8c7a7ba8c309c3c8c005");
 
-  if (!title || !desc) {
+  res.status(201).json(content);
+});
+
+const heroContent = asyncHandler(async (req, res) => {
+  const { hero } = req.body;
+
+  console.log(req.body);
+
+  if (!hero) {
     res.status(400);
     throw new Error("Please fill up all required fields.");
   }
@@ -128,7 +136,7 @@ const heroContent = asyncHandler(async (req, res) => {
     "652c8c7a7ba8c309c3c8c005",
 
     {
-      $set: { hero: req.body },
+      $set: { hero },
     },
 
     {
@@ -145,9 +153,9 @@ const heroContent = asyncHandler(async (req, res) => {
 });
 
 const aboutContent = asyncHandler(async (req, res) => {
-  const { title, desc } = req.body;
+  const { about } = req.body;
 
-  if (!title || !desc) {
+  if (!about) {
     res.status(400);
     throw new Error("Please fill up all required fields.");
   }
@@ -156,7 +164,7 @@ const aboutContent = asyncHandler(async (req, res) => {
     "652c8c7a7ba8c309c3c8c005",
 
     {
-      $set: { about: req.body },
+      $set: { about },
     },
 
     {
@@ -172,10 +180,10 @@ const aboutContent = asyncHandler(async (req, res) => {
   }
 });
 
-const serviceContent = asyncHandler(async (req, res) => {
-  const { title, desc } = req.body;
+const howContent = asyncHandler(async (req, res) => {
+  const { how } = req.body;
 
-  if (!title || !desc) {
+  if (!how) {
     res.status(400);
     throw new Error("Please fill up all required fields.");
   }
@@ -184,7 +192,35 @@ const serviceContent = asyncHandler(async (req, res) => {
     "652c8c7a7ba8c309c3c8c005",
 
     {
-      $set: { service: req.body },
+      $set: { how },
+    },
+
+    {
+      new: true,
+    }
+  );
+
+  if (content) {
+    res.status(201).json(content);
+  } else {
+    res.status(400);
+    throw new Error("Unsuccessful, Please try again");
+  }
+});
+
+const valueContent = asyncHandler(async (req, res) => {
+  const { value } = req.body;
+
+  if (!value) {
+    res.status(400);
+    throw new Error("Please fill up all required fields.");
+  }
+
+  const content = await Content.findByIdAndUpdate(
+    "652c8c7a7ba8c309c3c8c005",
+
+    {
+      $set: { value },
     },
 
     {
@@ -292,6 +328,70 @@ const userTransactionHistory = asyncHandler(async (req, res) => {
   res.status(201).json({ result: transactions.length, transactions });
 });
 
+const totalInvestments = asyncHandler(async (req, res) => {
+  const totalInvestments = await User.aggregate([
+    {
+      $group: {
+        _id: 1,
+        totalInvestments: { $sum: "$accountBalance" },
+      },
+    },
+  ]);
+  // const user = await User.findById(req.params.id);
+
+  // if (!user) {
+  //   res.status(400);
+  //   throw new Error("User not found, please signup");
+  // }
+
+  // const transactions = await Transaction.find({
+  //   userId: user._id,
+  // }).sort("-createdAt");
+
+  res.status(201).json(...totalInvestments);
+});
+
+const totalIntrest = asyncHandler(async (req, res) => {
+  const totalIntrest = await User.aggregate([
+    {
+      $group: {
+        _id: 1,
+        totalIntrest: { $sum: "$intrest" },
+      },
+    },
+  ]);
+
+  res.status(201).json(...totalIntrest);
+});
+
+const totalReferrals = asyncHandler(async (req, res) => {
+  const totalReferrals = await User.aggregate([
+    {
+      $group: {
+        _id: 1,
+        totalReferrals: { $sum: "$referralBonus" },
+      },
+    },
+  ]);
+
+  res.status(201).json(...totalReferrals);
+});
+
+const search = asyncHandler(async (req, res) => {
+  const searchTerm = req.query.searchTerm;
+
+  if (!searchTerm) {
+    res.status(400);
+    throw new Error("Please enter search term.");
+  }
+
+  const users = await User.find({
+    firstname: { $regex: searchTerm, $options: "i" },
+  });
+
+  res.status(201).json({ result: users.length, users });
+});
+
 module.exports = {
   updateNotification,
   deleteNotification,
@@ -304,9 +404,15 @@ module.exports = {
   getUser,
   heroContent,
   aboutContent,
-  serviceContent,
+  howContent,
+  valueContent,
+  getContent,
   payout,
   filterTransactionsByMonth,
   filterUserByMonth,
   userTransactionHistory,
+  totalInvestments,
+  totalIntrest,
+  totalReferrals,
+  search,
 };
