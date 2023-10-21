@@ -30,6 +30,8 @@ router
   .route("/transaction-history")
   .get(protect, userController.transactionHistory);
 
+router.route("/referrals").get(protect, userController.userReferrals);
+
 router.route("/user-withraws").get(protect, userController.transactionHistory);
 
 router

@@ -10,6 +10,7 @@ const sendEmail = require("../utils/sendEmail");
 const Transaction = require("../models/Transaction");
 const Notification = require("../models/Notification");
 const Withdraw = require("../models/Withdraw");
+const Referral = require("../models/Referrals");
 
 const generateToken = (id, username) => {
   return jwt.sign({ id, username }, process.env.JWT_SECRET);
@@ -34,7 +35,7 @@ const d = new Date();
 let month = months[d.getMonth()];
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { firstname, lastname, email, password } = req.body;
+  const { firstname, lastname, email, password, referral } = req.body;
 
   if (!firstname || !lastname || !email || !password) {
     res.status(400);
@@ -68,16 +69,50 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   // // Generate token
-  // const token = generateToken(user._id, user.name);
+  const token = generateToken(user._id, user.name);
 
-  // //Send HTTP-only cookie
-  // res.cookie("token", token, {
-  //   path: "/",
-  //   httpOnly: true,
-  //   expires: new Date(Date.now() + 1000 * 86400),
-  //   sameSite: "none",
-  //   secure: true,
-  // });
+  //Send HTTP-only cookie
+  res.cookie("token", token, {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 86400),
+    sameSite: "none",
+    secure: true,
+  });
+
+  if (referral) {
+    const referredBy = await User.findById(referral);
+
+    if (!referredBy) {
+      res.status(400);
+      throw new Error("Invalid referral code");
+    }
+
+    const bonus = referredBy.referralBonus + 500;
+
+    await User.findByIdAndUpdate(
+      referral,
+      {
+        $set: {
+          referralBonus: bonus,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+
+    const name = `${user.firstname} ${user.lastname}`;
+
+    await Referral.create({
+      userId: referredBy._id,
+      name,
+      referred: user._id,
+      email: user.email,
+      amount: bonus,
+      date: Date.now(),
+    });
+  }
 
   if (user) {
     res.status(201).json({ ...user._doc });
@@ -422,6 +457,21 @@ const userWithdrawals = asyncHandler(async (req, res) => {
   res.status(201).json({ result: transactions.length, transactions });
 });
 
+const userReferrals = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  const referrals = await Referral.find({
+    userId: user._id,
+  }).sort("-createdAt");
+
+  res.status(201).json({ result: referrals.length, referrals });
+});
+
 const getNotifications = asyncHandler(async (req, res) => {
   const notifications = await Notification.find({}).sort("-createdAt");
 
@@ -509,4 +559,5 @@ module.exports = {
   filterTransactionsByMonth,
   uploadPicture,
   userWithdrawals,
+  userReferrals,
 };
