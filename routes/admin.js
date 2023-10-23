@@ -54,8 +54,6 @@ router
   .route("/add-notification")
   .post(protect, isAdmin, adminController.addNotification);
 
-router.route("/content").get(protect, isAdmin, adminController.getContent);
-
 router.route("/hero").put(protect, isAdmin, adminController.heroContent);
 
 router.route("/about").put(protect, isAdmin, adminController.aboutContent);

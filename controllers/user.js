@@ -11,6 +11,7 @@ const Transaction = require("../models/Transaction");
 const Notification = require("../models/Notification");
 const Withdraw = require("../models/Withdraw");
 const Referral = require("../models/Referrals");
+const Content = require("../models/Content");
 
 const generateToken = (id, username) => {
   return jwt.sign({ id, username }, process.env.JWT_SECRET);
@@ -115,48 +116,69 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   if (user) {
-    res.status(201).json({ ...user._doc });
-    //   let token = await Token.findOne({ userId: user._id });
-    //   if (token) {
-    //     await token.deleteOne();
-    //   }
-    //   let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
+    // res.status(201).json({ ...user._doc });
+    let token = await Token.findOne({ userId: user._id });
+    if (token) {
+      await token.deleteOne();
+    }
+    let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
 
-    //   const hashToken = crypto
-    //     .createHash("sha256")
-    //     .update(resetToken)
-    //     .digest("hex");
+    const hashToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
 
-    //   await new Token({
-    //     userId: user._id,
-    //     token: hashToken,
-    //     createdAt: Date.now(),
-    //     expiresAt: Date.now() + 30 * (60 * 1000),
-    //   }).save();
+    await new Token({
+      userId: user._id,
+      token: hashToken,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 30 * (60 * 1000),
+    }).save();
 
-    //   const resetLink = `${process.env.FRONTEND_URL}/add-kyc/${resetToken}`;
-    //   const message = `
-    // <h2>Hi ${user.name}</h2>
-    // <p>Thank you for sign up to honey comb, Please use the url below to continue</p>
-    // <p>This link expires in 30 minutes</p>
-    // <a href=${resetLink} clicktracking=off>${resetLink}</a>
-    // <h6>Honey comb fxd</h6>
-    // `;
-    //   const subject = "Welcom to Honey-comb-fxd";
-    //   const send_to = user.email;
-    //   const send_from = process.env.EMAIL_USER;
+    const resetLink = `${process.env.FRONTEND_URL}/add-kyc/${resetToken}`;
+    const message = `
+    <h2>Hi ${user.name}</h2>
+    <p>Thank you for sign up to honey comb, Please use the url below to continue</p>
+    <p>This link expires in 30 minutes</p>
+    <a href=${resetLink} clicktracking=off>${resetLink}</a>
+    <h6>Honey comb fxd</h6>
+    `;
+    const subject = "Welcom to Honey-comb-fxd";
+    const send_to = user.email;
+    const send_from = process.env.EMAIL_USER;
 
-    // try {
-    //   await sendEmail(subject, message, send_to, send_from);
-    //   res.status(201).json({ ...user._doc });
-    // } catch (error) {
-    //   res.status(500);
-    //   throw new Error("Email not sent , Please try Again.");
-    // }
+    try {
+      await sendEmail(subject, message, send_to, send_from);
+      res.status(201).json({ ...user._doc });
+    } catch (error) {
+      res.status(500);
+      throw new Error("Email not sent , Please try Again.");
+    }
   } else {
     res.status(400);
     throw new Error("Unable to register user , Please try again");
   }
+});
+
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { resetToken } = req.params;
+
+  const hashToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  const userToken = await Token.findOne({
+    token: hashToken,
+    expiresAt: { $gt: Date.now() },
+  });
+
+  if (!userToken) {
+    res.status(404);
+    throw new Error("Invalid or Expired Token.");
+  }
+
+  res.status(200).json("Email verified successfully");
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -258,22 +280,12 @@ const addDocument = asyncHandler(async (req, res) => {
 
 const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
-  const {
-    firstname,
-    lastname,
-    email,
-    address,
-    DOB,
-    phone,
-    accountNumber,
-    bank,
-  } = req.body;
+  const { firstname, lastname, address, DOB, phone, accountNumber, bank } =
+    req.body;
 
   if (
     !firstname ||
-    !lastname ||
-    !email ||
-    !address ||
+    !lastname | !address ||
     !DOB ||
     !phone ||
     !accountNumber ||
@@ -296,7 +308,6 @@ const updateUser = asyncHandler(async (req, res) => {
         $set: {
           firstname,
           lastname,
-          email,
           DOB,
           address,
           phone,
@@ -478,6 +489,12 @@ const getNotifications = asyncHandler(async (req, res) => {
   res.status(201).json({ result: notifications.length, notifications });
 });
 
+const getNotification = asyncHandler(async (req, res) => {
+  const notification = await Notification.findById(req.params.id);
+
+  res.status(201).json(notification);
+});
+
 const getUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -545,8 +562,14 @@ const uploadPicture = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
+const getContent = asyncHandler(async (req, res) => {
+  const content = await Content.findById("652c8c7a7ba8c309c3c8c005");
+  res.status(201).json(content);
+});
+
 module.exports = {
   registerUser,
+  verifyEmail,
   loginUser,
   addDocument,
   updateUser,
@@ -560,4 +583,6 @@ module.exports = {
   uploadPicture,
   userWithdrawals,
   userReferrals,
+  getNotification,
+  getContent,
 };

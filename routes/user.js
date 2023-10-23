@@ -8,6 +8,8 @@ router.route("/register").post(userController.registerUser);
 
 router.route("/login").post(userController.loginUser);
 
+router.route("/content").get(userController.getContent);
+
 router
   .route("/add-kyc")
   .put(protect, upload.single("image"), userController.addDocument);
@@ -39,5 +41,7 @@ router
   .post(protect, userController.filterTransactionsByMonth);
 
 router.route("/notifications").get(protect, userController.getNotifications);
+
+router.route("/notification/:id").get(protect, userController.getNotification);
 
 module.exports = router;

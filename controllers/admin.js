@@ -125,12 +125,6 @@ const updateNotification = asyncHandler(async (req, res) => {
   res.status(201).json(newNotification);
 });
 
-const getContent = asyncHandler(async (req, res) => {
-  const content = await Content.findById("652c8c7a7ba8c309c3c8c005");
-
-  res.status(201).json(content);
-});
-
 const heroContent = asyncHandler(async (req, res) => {
   const { hero } = req.body;
 
@@ -274,7 +268,7 @@ const payout = asyncHandler(async (req, res) => {
     }
   );
 
-  const name = `${payer.firstname} ${payer.lastname}`;
+  const name = `Admin-${payer.firstname} ${payer.lastname}`;
 
   const transaction = await Transaction.create({
     userId: payee._id,
@@ -287,6 +281,22 @@ const payout = asyncHandler(async (req, res) => {
     currentBalance: newUser.accountBalance,
     oldBalance,
   });
+
+  //Update Withdraw
+  const withdrawReq = await Withdraw.find({ userId: payee._id });
+
+  await Withdraw.findByIdAndUpdate(
+    withdrawReq._id,
+    {
+      $set: {
+        status: "approved",
+      },
+    },
+
+    {
+      new: true,
+    }
+  );
 
   if (transaction) {
     res.status(201).json(transaction);
@@ -416,7 +426,6 @@ module.exports = {
   aboutContent,
   howContent,
   valueContent,
-  getContent,
   payout,
   filterTransactionsByMonth,
   filterUserByMonth,
