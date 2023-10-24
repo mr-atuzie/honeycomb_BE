@@ -411,6 +411,97 @@ const search = asyncHandler(async (req, res) => {
   res.status(201).json({ result: users.length, users });
 });
 
+const registerAdmin = asyncHandler(async (req, res) => {
+  const { firstname, lastname, email, password } = req.body;
+
+  if (!firstname || !lastname || !email || !password) {
+    res.status(400);
+    throw new Error("Please fill up all required fields.");
+  }
+
+  //Check password length
+  if (password.length < 6) {
+    res.status(400);
+    throw new Error("Password must be up to 6 characters.");
+  }
+
+  //Check if user already exist
+  const checkEmail = await User.findOne({ email });
+
+  if (checkEmail) {
+    res.status(400);
+    throw new Error("Email has already been register.");
+  }
+
+  //Hash user password..
+  const salt = await bcrypt.genSalt(10);
+  const hashPassword = await bcrypt.hash(password, salt);
+
+  const user = await User.create({
+    firstname,
+    lastname,
+    email,
+    month,
+    password: hashPassword,
+  });
+
+  if (user) {
+    res.status(201).json({ ...user._doc });
+  } else {
+    res.status(400);
+    throw new Error("Unable to register user , Please try again");
+  }
+});
+
+const loginAdmin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  //Valid Request
+  if (!email || !password) {
+    res.status(400);
+    throw new Error("Please fill up all required fields.");
+  }
+
+  //Check if user exist
+  const user = await User.findOne({ email: email });
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  //Check if password is valid
+  const checkPassword = await bcrypt.compare(password, user.password);
+
+  if (!checkPassword) {
+    res.status(400);
+    throw new Error("Incorrect email or password");
+  }
+
+  //Generate Token
+  const token = generateToken(user._id, user.name);
+
+  //Send HTTP-only
+  res.cookie("token", token, {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 86400),
+    sameSite: "none",
+    secure: true,
+  });
+
+  //Send Response
+  if (user && checkPassword) {
+    res.status(200).json({
+      ...user._doc,
+      token,
+    });
+  } else {
+    res.status(400);
+    throw new Error("Invalid login credentials");
+  }
+});
+
 module.exports = {
   updateNotification,
   deleteNotification,
@@ -434,4 +525,6 @@ module.exports = {
   totalIntrest,
   totalReferrals,
   search,
+  registerAdmin,
+  loginAdmin,
 };

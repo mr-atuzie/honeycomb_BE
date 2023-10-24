@@ -4,6 +4,10 @@ const protect = require("../middlewares/authMiddleware");
 const isAdmin = require("../middlewares/adminMiddleware");
 const adminController = require("../controllers/admin");
 
+router.route("/register").post(protect, isAdmin, adminController.registerAdmin);
+
+router.route("/login").post(adminController.loginAdmin);
+
 router
   .route("/all-transactions")
   .get(protect, isAdmin, adminController.getAllTransactions);
