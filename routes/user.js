@@ -8,6 +8,8 @@ router.route("/register").post(userController.registerUser);
 
 router.route("/login").post(userController.loginUser);
 
+router.route("/verify-email/:resetToken").post(userController.verifyEmail);
+
 router.route("/content").get(userController.getContent);
 
 router
