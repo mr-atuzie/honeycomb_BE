@@ -135,12 +135,12 @@ const registerUser = asyncHandler(async (req, res) => {
       expiresAt: Date.now() + 30 * (60 * 1000),
     }).save();
 
-    const resetLink = `${process.env.FRONTEND_URL}/add-kyc/${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/verify-email/${resetToken}`;
     const message = `
     <h2>Hi ${user.name}</h2>
     <p>Thank you for sign up to honey comb, Please use the url below to continue</p>
     <p>This link expires in 30 minutes</p>
-    <a href=${resetLink} clicktracking=off>${resetLink}</a>
+    <a href=${resetLink} style="color: green; font-size: 40px;" clicktracking=off>Verify Email</a>
     <h6>Honey comb fxd</h6>
     `;
     const subject = "Welcom to Honey-comb-fxd";
@@ -178,6 +178,18 @@ const verifyEmail = asyncHandler(async (req, res) => {
     throw new Error("Invalid or Expired Token.");
   }
 
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        verifyEmail: true,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
   res.status(200).json("Email verified successfully");
 });
 
@@ -196,6 +208,11 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!user) {
     res.status(400);
     throw new Error("User not found, please signup");
+  }
+
+  if (!user.verifyEmail) {
+    res.status(400);
+    throw new Error("Invalid email");
   }
 
   //Check if password is valid
@@ -347,7 +364,9 @@ const loginStatus = asyncHandler(async (req, res) => {
 
 const invest = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
-  const { amount, type } = req.body;
+  const { amount, type, duration } = req.body;
+
+  let intrest;
 
   if (!user) {
     res.status(400);
@@ -359,13 +378,21 @@ const invest = asyncHandler(async (req, res) => {
     throw new Error("Unable to complete transaction");
   }
 
+  if (type === "LRI") {
+    intrest = amount * 0.03 * duration;
+  }
+
+  if (type === "HRI") {
+    intrest = amount * 0.15 * duration;
+  }
+
   const oldBalance = user.accountBalance;
   const currentBalance = user.accountBalance + amount;
 
   const newUser = await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: { accountBalance: currentBalance },
+      $set: { accountBalance: currentBalance, intrest: intrest },
     },
     {
       new: true,
@@ -385,6 +412,7 @@ const invest = asyncHandler(async (req, res) => {
     currentBalance: newUser.accountBalance,
     oldBalance,
     month,
+    duration,
   });
 
   if (transaction) {

@@ -19,6 +19,9 @@ const transactionSchema = new mongoose.Schema(
     plan: {
       type: String,
     },
+    duration: {
+      type: String,
+    },
     amount: {
       type: Number,
     },

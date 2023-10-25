@@ -59,6 +59,10 @@ const userSchema = new mongoose.Schema(
     referrals: {
       type: Array,
     },
+    verifyEmail: {
+      type: Boolean,
+      default: false,
+    },
     admin: {
       type: Boolean,
       default: false,
