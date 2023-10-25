@@ -443,6 +443,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
     email,
     month,
     password: hashPassword,
+    admin: true,
   });
 
   if (user) {
@@ -468,6 +469,11 @@ const loginAdmin = asyncHandler(async (req, res) => {
   if (!user) {
     res.status(400);
     throw new Error("User not found, please signup");
+  }
+
+  if (!user.admin) {
+    res.status(400);
+    throw new Error("Not Allowed");
   }
 
   //Check if password is valid
