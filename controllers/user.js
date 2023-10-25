@@ -368,6 +368,10 @@ const invest = asyncHandler(async (req, res) => {
   const { amount, type, duration } = req.body;
 
   let intrest;
+  let typeValue;
+  let durationValue;
+
+  console.log({ amount, type, duration: parseInt(type) });
 
   if (!user) {
     res.status(400);
@@ -379,21 +383,26 @@ const invest = asyncHandler(async (req, res) => {
     throw new Error("Unable to complete transaction");
   }
 
-  if (type === "LRI") {
-    intrest = amount * 0.03 * duration;
+  if (type === "0.15") {
+    typeValue = "HRI";
+    intrest = parseInt(amount) * 0.15 * parseInt(duration);
   }
 
-  if (type === "HRI") {
-    intrest = amount * 0.15 * duration;
+  if (type === "0.03") {
+    typeValue = "LRI";
+    intrest = parseInt(amount) * 0.03 * parseInt(duration);
   }
+
+  console.log(intrest);
 
   const oldBalance = user.accountBalance;
-  const currentBalance = user.accountBalance + amount;
+  const currentBalance = user.accountBalance + parseInt(amount);
+  const intrestBalance = user.intrest + intrest;
 
   const newUser = await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: { accountBalance: currentBalance, intrest: intrest },
+      $set: { accountBalance: currentBalance, intrest: intrestBalance },
     },
     {
       new: true,
@@ -407,7 +416,7 @@ const invest = asyncHandler(async (req, res) => {
     name,
     email: user.email,
     type: "credit",
-    plan: type,
+    plan: typeValue,
     amount,
     date: Date.now(),
     currentBalance: newUser.accountBalance,
