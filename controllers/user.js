@@ -116,13 +116,12 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   if (user) {
-   
     let token = await Token.findOne({ userId: user._id });
 
     if (token) {
       await token.deleteOne();
     }
-    
+
     let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
 
     const hashToken = crypto
@@ -142,7 +141,7 @@ const registerUser = asyncHandler(async (req, res) => {
     <h2>Hi ${user.name}</h2>
     <p>Thank you for sign up to honey comb, Please use the url below to continue</p>
     <p>This link expires in 30 minutes</p>
-    <a href=${resetLink} style="color: green; font-size: 40px;" clicktracking=off>Verify Email</a>
+    <a href=${resetLink} style="color: green; font-size: 30px;" clicktracking=off>Verify Email</a>
     <h6>Honey comb fxd</h6>
     `;
     const subject = "Welcom to Honey-comb-fxd";
