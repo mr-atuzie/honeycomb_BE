@@ -70,16 +70,16 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   // // Generate token
-  const token = generateToken(user._id, user.name);
+  // const token = generateToken(user._id, user.name);
 
   //Send HTTP-only cookie
-  res.cookie("token", token, {
-    path: "/",
-    httpOnly: true,
-    expires: new Date(Date.now() + 1000 * 86400),
-    sameSite: "none",
-    secure: true,
-  });
+  // res.cookie("token", token, {
+  //   path: "/",
+  //   httpOnly: true,
+  //   expires: new Date(Date.now() + 1000 * 86400),
+  //   sameSite: "none",
+  //   secure: true,
+  // });
 
   if (referral) {
     const referredBy = await User.findById(referral);
@@ -116,11 +116,13 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   if (user) {
-    // res.status(201).json({ ...user._doc });
+   
     let token = await Token.findOne({ userId: user._id });
+
     if (token) {
       await token.deleteOne();
     }
+    
     let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
 
     const hashToken = crypto
