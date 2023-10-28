@@ -368,30 +368,33 @@ const lowRiskInvestment = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   const { amount, type, duration } = req.body;
 
+  // console.log({ amount: parseInt(amount), type, duration: parseInt(duration) });
+
   if (!user) {
     res.status(400);
     throw new Error("User not found, please signup");
   }
 
-  if (!amount || !type) {
+  if (!amount || !type || !duration) {
     res.status(400);
     throw new Error("Unable to complete transaction");
   }
 
-  if (amount < 100000) {
+  if (parseInt(amount) < 100000) {
     res.status(400);
     throw new Error("Minimum amount for investment is 100,000");
   }
 
-  //Find Pay out date
+  // //Find Pay out date
   const currentDate = new Date();
-  const durationInMonths = duration * 30;
+  const durationInMonths = parseInt(duration) * 30;
   const maturity = currentDate.setDate(
     currentDate.getDate() + durationInMonths
   );
 
   const intrestPerMonth = parseInt(amount) * 0.03;
-  const payout = intrestPerMonth * duration;
+  const payout = intrestPerMonth * parseInt(duration);
+
   const currentBalance = user.accountBalance + parseInt(amount);
   const currentIntrest = user.intrest + intrestPerMonth;
 
