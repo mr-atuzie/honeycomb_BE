@@ -26,9 +26,15 @@ router.route("/update-user").patch(protect, userController.updateUser);
 
 router.route("/").get(protect, userController.getUser);
 
-router.route("/invest").post(protect, userController.invest);
+router
+  .route("/low-risk-investment")
+  .post(protect, userController.lowRiskInvestment);
 
-router.route("/withdraw").post(protect, userController.withdraw);
+router
+  .route("/high-risk-investment")
+  .post(protect, userController.highRiskInvestment);
+
+router.route("/withdraw/:id").get(protect, userController.withdraw);
 
 router
   .route("/transaction-history")

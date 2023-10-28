@@ -12,11 +12,12 @@ const Notification = require("../models/Notification");
 const Withdraw = require("../models/Withdraw");
 const Referral = require("../models/Referrals");
 const Content = require("../models/Content");
+const Investment = require("../models/Investment");
 
 const generateToken = (id, username) => {
   return jwt.sign({ id, username }, process.env.JWT_SECRET);
 };
-// new commit
+
 const months = [
   "January",
   "February",
@@ -31,7 +32,6 @@ const months = [
   "November",
   "December",
 ];
-
 const d = new Date();
 let month = months[d.getMonth()];
 
@@ -138,13 +138,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const resetLink = `${process.env.FRONTEND_URL}/verify-email/${resetToken}`;
     const message = `
-    <h2>Hi ${user.name}</h2>
-    <p>Thank you for sign up to honey comb, Please use the url below to continue</p>
-    <p>This link expires in 30 minutes</p>
-    <a href=${resetLink} style="color: green; font-size: 30px;" clicktracking=off>Verify Email</a>
+    <p>You’re almost finished setting up your account</p>
+    <h2>Hi ${user.firstname}</h2>
+    <p>Let’s finish creating your account</p>
+    <p> Please take a moment to confirm your email address.</p>
+    <a href=${resetLink} style="color: green; font-size: 16px;" clicktracking=off>Verify Email</a>
     <h6>Honey comb fxd</h6>
     `;
-    const subject = "Welcom to Honey-comb-fxd";
+    const subject = "Honey comb fxd farm Email Confirmation";
     const send_to = user.email;
     const send_from = process.env.EMAIL_USER;
 
@@ -363,15 +364,9 @@ const loginStatus = asyncHandler(async (req, res) => {
   }
 });
 
-const invest = asyncHandler(async (req, res) => {
+const lowRiskInvestment = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   const { amount, type, duration } = req.body;
-
-  let intrest;
-  let typeValue;
-  let durationValue;
-
-  console.log({ amount, type, duration: parseInt(type) });
 
   if (!user) {
     res.status(400);
@@ -383,26 +378,27 @@ const invest = asyncHandler(async (req, res) => {
     throw new Error("Unable to complete transaction");
   }
 
-  if (type === "0.15") {
-    typeValue = "HRI";
-    intrest = parseInt(amount) * 0.15 * parseInt(duration);
+  if (amount < 100000) {
+    res.status(400);
+    throw new Error("Minimum amount for investment is 100,000");
   }
 
-  if (type === "0.03") {
-    typeValue = "LRI";
-    intrest = parseInt(amount) * 0.03 * parseInt(duration);
-  }
+  //Find Pay out date
+  const currentDate = new Date();
+  const durationInMonths = duration * 30;
+  const maturity = currentDate.setDate(
+    currentDate.getDate() + durationInMonths
+  );
 
-  console.log(intrest);
-
-  const oldBalance = user.accountBalance;
+  const intrestPerMonth = parseInt(amount) * 0.03;
+  const payout = intrestPerMonth * duration;
   const currentBalance = user.accountBalance + parseInt(amount);
-  const intrestBalance = user.intrest + intrest;
+  const currentIntrest = user.intrest + intrestPerMonth;
 
   const newUser = await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: { accountBalance: currentBalance, intrest: intrestBalance },
+      $set: { accountBalance: currentBalance, intrest: currentIntrest },
     },
     {
       new: true,
@@ -416,57 +412,137 @@ const invest = asyncHandler(async (req, res) => {
     name,
     email: user.email,
     type: "credit",
-    plan: typeValue,
+    plan: type,
     amount,
     date: Date.now(),
-    currentBalance: newUser.accountBalance,
-    oldBalance,
     month,
-    duration,
   });
 
-  if (transaction) {
-    res.status(201).json(transaction);
-  } else {
-    res.status(400);
-    throw new Error("Transaction failed");
-  }
+  const investment = await Investment.create({
+    userId: user._id,
+    name,
+    email: user.email,
+    type,
+    amount,
+    intrest: intrestPerMonth,
+    payout,
+    maturity,
+  });
+
+  res.status(201).json({
+    newUser,
+    investment,
+    transaction,
+  });
 });
 
-const withdraw = asyncHandler(async (req, res) => {
+const highRiskInvestment = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
-  const { amount } = req.body;
+  const { amount, type } = req.body;
 
   if (!user) {
     res.status(400);
     throw new Error("User not found, please signup");
   }
 
-  if (!amount) {
+  if (!amount || !type) {
     res.status(400);
     throw new Error("Unable to complete transaction");
   }
 
-  if (amount < 10) {
+  if (amount < 100000) {
     res.status(400);
-    throw new Error("Please enter a valid amount");
+    throw new Error("Minimum amount for investment is 100,000");
   }
 
-  if (user.accountBalance <= 0 || amount > user.accountBalance) {
-    res.status(400);
-    throw new Error("Insufficient funds");
-  }
+  //Find Pay out date
+  const currentDate = new Date();
+  const duration = 7;
+  const maturity = currentDate.setDate(currentDate.getDate() + duration);
+
+  //collect reg fee
+  // const regFee = parseInt(amount) * 0.05;
+  // const amountAfterDeduct = parseInt(amount) - regFee;
+
+  const intrestPerWeek = parseInt(amount) * 0.15;
+  const investmentReturn = parseInt(amount) / 4;
+  const payout = investmentReturn + intrestPerWeek;
+  const currentBalance = user.accountBalance + parseInt(amount);
+  const currentIntrest = user.intrest + intrestPerWeek;
+
+  const newUser = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: { accountBalance: currentBalance, intrest: currentIntrest },
+    },
+    {
+      new: true,
+    }
+  );
 
   const name = `${user.firstname} ${user.lastname}`;
 
-  const transaction = await Withdraw.create({
+  const transaction = await Transaction.create({
     userId: user._id,
     name,
     email: user.email,
+    type: "credit",
+    plan: type,
     amount,
     date: Date.now(),
-    status: "pending",
+    month,
   });
+
+  const investment = await Investment.create({
+    userId: user._id,
+    name,
+    email: user.email,
+    type,
+    amount,
+    intrest: intrestPerWeek,
+    payout,
+    maturity,
+  });
+
+  res.status(201).json({
+    newUser,
+    investment,
+    transaction,
+  });
+
+  // if (transaction) {
+  //   res.status(201).json(transaction);
+  // } else {
+  //   res.status(400);
+  //   throw new Error("Transaction failed");
+  // }
+});
+
+const withdraw = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const id = req.params.id;
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  const investment = await Investment.findById(id);
+
+  if (!investment) {
+    res.status(400);
+    throw new Error("Not allowed");
+  }
+
+  const transaction = await Investment.findByIdAndUpdate(
+    investment._id,
+    {
+      $set: { status: "withdraw" },
+    },
+    {
+      new: true,
+    }
+  );
 
   if (transaction) {
     res.status(201).json(transaction);
@@ -499,7 +575,7 @@ const userWithdrawals = asyncHandler(async (req, res) => {
     throw new Error("User not found, please signup");
   }
 
-  const transactions = await Withdraw.find({
+  const transactions = await Investment.find({
     userId: user._id,
   }).sort("-createdAt");
 
@@ -612,7 +688,7 @@ module.exports = {
   addDocument,
   updateUser,
   loginStatus,
-  invest,
+  lowRiskInvestment,
   withdraw,
   transactionHistory,
   getNotifications,
@@ -623,4 +699,5 @@ module.exports = {
   userReferrals,
   getNotification,
   getContent,
+  highRiskInvestment,
 };

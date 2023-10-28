@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const transactionSchema = new mongoose.Schema(
+const investmentSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -10,22 +10,26 @@ const transactionSchema = new mongoose.Schema(
     name: {
       type: String,
     },
-    email: {
-      type: String,
-    },
     type: {
       type: String,
     },
-    plan: {
+
+    email: {
       type: String,
     },
     amount: {
       type: Number,
     },
-    date: {
+    intrest: {
+      type: Number,
+    },
+    payout: {
+      type: Number,
+    },
+    maturity: {
       type: Date,
     },
-    month: {
+    status: {
       type: String,
       default: "",
     },
@@ -33,5 +37,5 @@ const transactionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Transaction = mongoose.model("Transaction", transactionSchema);
-module.exports = Transaction;
+const Investment = mongoose.model("Investment", investmentSchema);
+module.exports = Investment;

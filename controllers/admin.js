@@ -35,7 +35,7 @@ const getAllPendingKyc = asyncHandler(async (req, res) => {
 });
 
 const getAllPendingWithdraws = asyncHandler(async (req, res) => {
-  const withdraws = await Withdraw.find({ status: "pending" }).sort(
+  const withdraws = await Investment.find({ status: "withdraw" }).sort(
     "-createdAt"
   );
 
