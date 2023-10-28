@@ -69,17 +69,17 @@ const registerUser = asyncHandler(async (req, res) => {
     password: hashPassword,
   });
 
-  // // Generate token
-  // const token = generateToken(user._id, user.name);
+  // Generate token
+  const token = generateToken(user._id, user.name);
 
-  //Send HTTP-only cookie
-  // res.cookie("token", token, {
-  //   path: "/",
-  //   httpOnly: true,
-  //   expires: new Date(Date.now() + 1000 * 86400),
-  //   sameSite: "none",
-  //   secure: true,
-  // });
+  // Send HTTP-only cookie
+  res.cookie("token", token, {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 86400),
+    sameSite: "none",
+    secure: true,
+  });
 
   if (referral) {
     const referredBy = await User.findById(referral);
