@@ -623,6 +623,21 @@ const getUser = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
+const userInvestments = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  const investments = await Investment.find({
+    userId: user._id,
+  }).sort("-createdAt");
+
+  res.status(201).json({ result: investments.length, investments });
+});
+
 const filterTransactionsByMonth = asyncHandler(async (req, res) => {
   const { month } = req.body;
 
@@ -703,4 +718,5 @@ module.exports = {
   getNotification,
   getContent,
   highRiskInvestment,
+  userInvestments,
 };

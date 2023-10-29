@@ -12,6 +12,8 @@ router
   .route("/verify-email/:resetToken")
   .get(protect, userController.verifyEmail);
 
+router.route("/investments").get(protect, userController.userInvestments);
+
 router.route("/content").get(userController.getContent);
 
 router
