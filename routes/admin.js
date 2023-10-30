@@ -37,6 +37,10 @@ router.route("/all-users").get(protect, isAdmin, adminController.getAllUsers);
 router.route("/user/:id").get(protect, isAdmin, adminController.getUser);
 
 router
+  .route("/investment/:id")
+  .get(protect, isAdmin, adminController.getInvestment);
+
+router
   .route("/filter-transactions-month")
   .post(protect, isAdmin, adminController.filterTransactionsByMonth);
 
@@ -75,6 +79,10 @@ router
 router
   .route("/transaction-history/:id")
   .get(protect, isAdmin, adminController.userTransactionHistory);
+
+router
+  .route("/investments/:id")
+  .get(protect, isAdmin, adminController.userInvestments);
 
 router
   .route("/delete-notification/:id")

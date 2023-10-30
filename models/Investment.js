@@ -33,6 +33,12 @@ const investmentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    weeklyReturn: {
+      type: String,
+    },
+    paid: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );

@@ -4,6 +4,24 @@ const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
 const Withdraw = require("../models/Withdraw");
+const Investment = require("../models/Investment");
+
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+const d = new Date();
+let month = months[d.getMonth()];
 
 const getAllTransactions = asyncHandler(async (req, res) => {
   const transactions = await Transaction.find({}).sort("-createdAt");
@@ -15,6 +33,12 @@ const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find({}).sort("-createdAt");
 
   res.status(201).json({ result: users.length, users });
+});
+
+const getInvestment = asyncHandler(async (req, res) => {
+  const investment = await Investment.findById(req.params.id);
+
+  res.status(201).json(investment);
 });
 
 const getUser = asyncHandler(async (req, res) => {
@@ -240,14 +264,15 @@ const valueContent = asyncHandler(async (req, res) => {
 });
 
 const payout = asyncHandler(async (req, res) => {
-  const payee = await User.findById(req.params.id);
+  const investment = await Investment.findById(req.params.id);
   const payer = await User.findById(req.user._id);
+  const payee = await User.findById(investment.userId);
 
   const { amount, type } = req.body;
 
-  if (!payee) {
+  if (!investment) {
     res.status(400);
-    throw new Error("User not found, please signup");
+    throw new Error("Unable to complete transaction");
   }
 
   if (!amount || !type) {
@@ -255,13 +280,13 @@ const payout = asyncHandler(async (req, res) => {
     throw new Error("Unable to complete transaction");
   }
 
-  const oldBalance = payee.accountBalance;
   const currentBalance = payee.accountBalance - amount;
+  const currentIntrest = payee.intrest - investment.intrest;
 
   const newUser = await User.findByIdAndUpdate(
     payee._id,
     {
-      $set: { accountBalance: currentBalance },
+      $set: { accountBalance: currentBalance, intrest: currentIntrest },
     },
     {
       new: true,
@@ -270,23 +295,24 @@ const payout = asyncHandler(async (req, res) => {
 
   const name = `Admin-${payer.firstname} ${payer.lastname}`;
 
+  const payout = investment.intrest + investment.amount;
+
   const transaction = await Transaction.create({
     userId: payee._id,
     name,
     email: payer.email,
-    type: "withdrawal",
+    type: "payout",
     plan: type,
-    amount,
+    amount: payout,
     date: Date.now(),
-    currentBalance: newUser.accountBalance,
-    oldBalance,
+    month: month,
   });
 
-  //Update Withdraw
-  const withdrawReq = await Withdraw.find({ userId: payee._id });
+  // //Update Withdraw
+  // const withdrawReq = await Withdraw.find({ userId: payee._id });
 
-  await Withdraw.findByIdAndUpdate(
-    withdrawReq._id,
+  await Investment.findByIdAndUpdate(
+    investment._id,
     {
       $set: {
         status: "approved",
@@ -345,6 +371,21 @@ const userTransactionHistory = asyncHandler(async (req, res) => {
   }).sort("-createdAt");
 
   res.status(201).json({ result: transactions.length, transactions });
+});
+
+const userInvestments = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  const investments = await Investment.find({
+    userId: user._id,
+  }).sort("-createdAt");
+
+  res.status(201).json({ result: investments.length, investments });
 });
 
 const totalInvestments = asyncHandler(async (req, res) => {
@@ -523,10 +564,12 @@ module.exports = {
   aboutContent,
   howContent,
   valueContent,
+  getInvestment,
   payout,
   filterTransactionsByMonth,
   filterUserByMonth,
   userTransactionHistory,
+  userInvestments,
   totalInvestments,
   totalIntrest,
   totalReferrals,
