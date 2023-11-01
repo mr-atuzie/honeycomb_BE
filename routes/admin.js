@@ -70,7 +70,11 @@ router.route("/how").put(protect, isAdmin, adminController.howContent);
 
 router.route("/value").put(protect, isAdmin, adminController.valueContent);
 
-router.route("/payout/:id").post(protect, isAdmin, adminController.payout);
+router.route("/payout/:id").get(protect, isAdmin, adminController.payout);
+
+router
+  .route("/high-payout/:id")
+  .get(protect, isAdmin, adminController.highpayout);
 
 router
   .route("/update-notification/:id")

@@ -268,22 +268,79 @@ const payout = asyncHandler(async (req, res) => {
   const payer = await User.findById(req.user._id);
   const payee = await User.findById(investment.userId);
 
-  const { amount, type } = req.body;
+  if (!investment) {
+    res.status(400);
+    throw new Error("Unable to complete transaction");
+  }
+
+  const currentBalance = payee.accountBalance - investment.amount;
+  const currentIntrest = payee.intrest - investment.payout;
+
+  await User.findByIdAndUpdate(
+    payee._id,
+    {
+      $set: { accountBalance: currentBalance, intrest: currentIntrest },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const name = `Admin-${payer.firstname} ${payer.lastname}`;
+  const payout = investment.payout + investment.amount;
+
+  const transaction = await Transaction.create({
+    userId: payee._id,
+    name,
+    email: payer.email,
+    type: "payout",
+    plan: investment.type,
+    amount: payout,
+    date: Date.now(),
+    month: month,
+  });
+
+  await Investment.findByIdAndUpdate(
+    investment._id,
+    {
+      $set: {
+        status: "approved",
+        paid: payout,
+      },
+    },
+
+    {
+      new: true,
+    }
+  );
+
+  if (transaction) {
+    res.status(201).json(transaction);
+  } else {
+    res.status(400);
+    throw new Error("Transaction failed");
+  }
+});
+
+const highpayout = asyncHandler(async (req, res) => {
+  const investment = await Investment.findById(req.params.id);
+  const payer = await User.findById(req.user._id);
+  const payee = await User.findById(investment.userId);
 
   if (!investment) {
     res.status(400);
     throw new Error("Unable to complete transaction");
   }
 
-  if (!amount || !type) {
-    res.status(400);
-    throw new Error("Unable to complete transaction");
-  }
+  //Find Pay out date
+  const currentDate = new Date();
+  const duration = 7;
+  const maturity = currentDate.setDate(currentDate.getDate() + duration);
 
-  const currentBalance = payee.accountBalance - amount;
-  const currentIntrest = payee.intrest - investment.intrest;
+  const currentBalance = payee.accountBalance - investment.payout;
+  const currentIntrest = payee.intrest - investment.payout;
 
-  const newUser = await User.findByIdAndUpdate(
+  await User.findByIdAndUpdate(
     payee._id,
     {
       $set: { accountBalance: currentBalance, intrest: currentIntrest },
@@ -295,27 +352,30 @@ const payout = asyncHandler(async (req, res) => {
 
   const name = `Admin-${payer.firstname} ${payer.lastname}`;
 
-  const payout = investment.intrest + investment.amount;
+  const payout = investment.payout;
 
   const transaction = await Transaction.create({
     userId: payee._id,
     name,
     email: payer.email,
     type: "payout",
-    plan: type,
+    plan: investment.type,
     amount: payout,
     date: Date.now(),
     month: month,
   });
 
   // //Update Withdraw
-  // const withdrawReq = await Withdraw.find({ userId: payee._id });
+  // const withdrawReq = await Withdraw.find({ userId: payee._id });#
+  const paid = investment.paid + payout;
 
   await Investment.findByIdAndUpdate(
     investment._id,
     {
       $set: {
-        status: "approved",
+        status: "",
+        maturity: maturity,
+        paid: paid,
       },
     },
 
@@ -576,4 +636,5 @@ module.exports = {
   search,
   registerAdmin,
   loginAdmin,
+  highpayout,
 };

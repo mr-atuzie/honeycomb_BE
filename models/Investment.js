@@ -35,6 +35,7 @@ const investmentSchema = new mongoose.Schema(
     },
     paid: {
       type: Number,
+      default: 0,
     },
   },
   { timestamps: true }
