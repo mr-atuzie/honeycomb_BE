@@ -273,7 +273,7 @@ const payout = asyncHandler(async (req, res) => {
     throw new Error("Unable to complete transaction");
   }
 
-  const currentBalance = payee.accountBalance - investment.amount;
+  // const currentBalance = payee.accountBalance - investment.amount;
   const currentIntrest = payee.intrest - investment.payout;
 
   await User.findByIdAndUpdate(
@@ -337,7 +337,7 @@ const highpayout = asyncHandler(async (req, res) => {
   const duration = 7;
   const maturity = currentDate.setDate(currentDate.getDate() + duration);
 
-  const currentBalance = payee.accountBalance - investment.payout;
+  // const currentBalance = payee.accountBalance - investment.payout;
   const currentIntrest = payee.intrest - investment.payout;
 
   await User.findByIdAndUpdate(

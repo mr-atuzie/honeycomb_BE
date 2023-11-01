@@ -249,6 +249,78 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
+const forgetPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  //Valid Request
+  if (!email) {
+    res.status(400);
+    throw new Error("Please fill up all required fields.");
+  }
+
+  //Check if user exist
+  const user = await User.findOne({ email: email });
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  if (!user.verifyEmail) {
+    res.status(400);
+    throw new Error("Invalid email");
+  }
+
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  function generateString(length) {
+    let result = " ";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+  }
+
+  const newPassword = generateString(7);
+
+  //Hash user password..
+  const salt = await bcrypt.genSalt(10);
+  const hashPassword = await bcrypt.hash(newPassword, salt);
+
+  await User.findByIdAndUpdate(
+    user._id,
+    {
+      $set: {
+        password: hashPassword,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const message = `
+  <h2>Hi ${user.firstname}</h2>
+  <p>Your new password is ${newPassword}</p>
+  
+  <h6>Honey comb fxd</h6>
+  `;
+  const subject = "Forgot Password";
+  const send_to = user.email;
+  const send_from = process.env.EMAIL_USER;
+
+  try {
+    await sendEmail(subject, message, send_to, send_from);
+    res.status(201).json({ ...user._doc });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Email not sent , Please try Again.");
+  }
+});
+
 const addDocument = asyncHandler(async (req, res) => {
   const { idType } = req.body;
 
@@ -721,4 +793,5 @@ module.exports = {
   getContent,
   highRiskInvestment,
   userInvestments,
+  forgetPassword,
 };
