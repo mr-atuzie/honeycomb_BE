@@ -6,6 +6,7 @@ const asyncHandler = require("express-async-handler");
 const Withdraw = require("../models/Withdraw");
 const Investment = require("../models/Investment");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const months = [
   "January",
@@ -23,6 +24,10 @@ const months = [
 ];
 const d = new Date();
 let month = months[d.getMonth()];
+
+const generateToken = (id, username) => {
+  return jwt.sign({ id, username }, process.env.JWT_SECRET);
+};
 
 const getAllTransactions = asyncHandler(async (req, res) => {
   const transactions = await Transaction.find({}).sort("-createdAt");
