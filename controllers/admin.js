@@ -5,6 +5,7 @@ const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
 const Withdraw = require("../models/Withdraw");
 const Investment = require("../models/Investment");
+const bcrypt = require("bcryptjs");
 
 const months = [
   "January",
