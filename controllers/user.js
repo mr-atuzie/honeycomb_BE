@@ -712,6 +712,19 @@ const userInvestments = asyncHandler(async (req, res) => {
   res.status(201).json({ result: investments.length, investments });
 });
 
+const userInvestment = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  const investment = await Investment.findById(req.params.id);
+
+  res.status(201).json(investment);
+});
+
 const filterTransactionsByMonth = asyncHandler(async (req, res) => {
   const { month } = req.body;
 
@@ -773,6 +786,21 @@ const getContent = asyncHandler(async (req, res) => {
   res.status(201).json(content);
 });
 
+const logout = asyncHandler(async (req, res) => {
+  res.cookie("token", "", {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(0),
+    sameSite: "none",
+    secure: true,
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Log out Successful",
+  });
+});
+
 module.exports = {
   registerUser,
   verifyEmail,
@@ -793,5 +821,7 @@ module.exports = {
   getContent,
   highRiskInvestment,
   userInvestments,
+  userInvestment,
   forgetPassword,
+  logout,
 };

@@ -36,11 +36,15 @@ router
   .route("/low-risk-investment")
   .post(protect, userController.lowRiskInvestment);
 
+router.route("/logout").get(userController.logout);
+
 router
   .route("/high-risk-investment")
   .post(protect, userController.highRiskInvestment);
 
 router.route("/withdraw/:id").get(protect, userController.withdraw);
+
+router.route("/investment/:id").get(protect, userController.userInvestment);
 
 router
   .route("/transaction-history")

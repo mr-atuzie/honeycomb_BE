@@ -273,13 +273,12 @@ const payout = asyncHandler(async (req, res) => {
     throw new Error("Unable to complete transaction");
   }
 
-  // const currentBalance = payee.accountBalance - investment.amount;
   const currentIntrest = payee.intrest - investment.payout;
 
   await User.findByIdAndUpdate(
     payee._id,
     {
-      $set: { accountBalance: currentBalance, intrest: currentIntrest },
+      $set: { intrest: currentIntrest },
     },
     {
       new: true,
@@ -545,6 +544,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
     month,
     password: hashPassword,
     admin: true,
+    verifyEmail: true,
   });
 
   if (user) {
