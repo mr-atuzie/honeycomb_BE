@@ -43,7 +43,7 @@ const connectDB = () => {
 
 //Routes
 app.get("/", (req, res) => {
-  res.send("Trade");
+  res.send("Honey comb fxd farm");
 });
 
 app.use("/api/v1/user", userRoutes);
