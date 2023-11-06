@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 // app.use(morgan("dev"));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://honey-comb-fxd.netlify.app"],
+    origin: ["http://localhost:3000", "https://honeycombfxd.com"],
     credentials: true,
   })
 );
