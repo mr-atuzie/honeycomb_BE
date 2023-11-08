@@ -61,12 +61,29 @@ const registerUser = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashPassword = await bcrypt.hash(password, salt);
 
+  //Create verification Code
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  function generateString(length) {
+    let result = " ";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+  }
+
+  const verificationCode = generateString(7);
+
   const user = await User.create({
     firstname,
     lastname,
     email,
     month,
     password: hashPassword,
+    verificationCode: verificationCode,
   });
 
   // Generate token
@@ -81,6 +98,7 @@ const registerUser = asyncHandler(async (req, res) => {
     secure: true,
   });
 
+  // if user has a referral
   if (referral) {
     const referredBy = await User.findById(referral);
 
@@ -116,36 +134,39 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   if (user) {
-    let token = await Token.findOne({ userId: user._id });
+    // let token = await Token.findOne({ userId: user._id });
 
-    if (token) {
-      await token.deleteOne();
-    }
+    // if (token) {
+    //   await token.deleteOne();
+    // }
 
-    let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
+    // let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
 
-    const hashToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
+    // const hashToken = crypto
+    //   .createHash("sha256")
+    //   .update(resetToken)
+    //   .digest("hex");
 
-    await new Token({
-      userId: user._id,
-      token: hashToken,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 30 * (60 * 1000),
-    }).save();
+    // await new Token({
+    //   userId: user._id,
+    //   token: verificationCode,
+    //   createdAt: Date.now(),
+    //   expiresAt: Date.now() + 30 * (60 * 1000),
+    // }).save();
 
-    const resetLink = `${process.env.FRONTEND_URL}/verify-email/${resetToken}`;
+    // const resetLink = `${process.env.FRONTEND_URL}/verify-email/${resetToken}`;
+    // <a href=${resetLink} style="color: green; font-size: 16px;" clicktracking=off>Verify Email</a>
     const message = `
     <p>You’re almost finished setting up your account</p>
     <h2>Hi ${user.firstname}</h2>
     <p>Let’s finish creating your account</p>
     <p> Please take a moment to confirm your email address.</p>
-    <a href=${resetLink} style="color: green; font-size: 16px;" clicktracking=off>Verify Email</a>
+    <h6>Your verification code is</h6>
+    <h2> ${verificationCode}</h2>
+
     <h6>Honey comb fxd</h6>
     `;
-    const subject = "Honey comb fxd farm Email Confirmation";
+    const subject = "Email Confirmation";
     const send_to = user.email;
     const send_from = process.env.EMAIL_USER;
 
@@ -163,28 +184,46 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
-  const { resetToken } = req.params;
+  const { verificationCode } = req.body;
+  const user = await User.findById(req.user._id);
 
-  const hashToken = crypto
-    .createHash("sha256")
-    .update(resetToken)
-    .digest("hex");
-
-  const userToken = await Token.findOne({
-    token: hashToken,
-    expiresAt: { $gt: Date.now() },
-  });
-
-  if (!userToken) {
-    res.status(404);
-    throw new Error("Invalid or Expired Token.");
+  if (!verificationCode) {
+    res.status(400);
+    throw new Error("Please enter a valid code");
   }
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  if (user.verificationCode != verificationCode) {
+    res.status(400);
+    throw new Error("Please enter a valid code");
+  }
+  // const { resetToken } = req.params;
+
+  // const hashToken = crypto
+  //   .createHash("sha256")
+  //   .update(resetToken)
+  //   .digest("hex");
+
+  // const userToken = await Token.findOne({
+  //   userId: user._id,
+  //   expiresAt: { $gt: Date.now() },
+  // });
+
+  // if (!userToken) {
+  //   res.status(404);
+  //   throw new Error("Invalid or Expired Token.");
+  // }
 
   await User.findByIdAndUpdate(
     req.user._id,
     {
       $set: {
         verifyEmail: true,
+        verificationCode: "verified",
       },
     },
     {
@@ -192,7 +231,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
     }
   );
 
-  res.status(200).json("Email verified successfully");
+  res.status(200).json("Email verification successfull");
 });
 
 const loginUser = asyncHandler(async (req, res) => {

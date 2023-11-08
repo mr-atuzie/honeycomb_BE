@@ -56,6 +56,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    verificationCode: {
+      type: String,
+      default: "",
+    },
     referrals: {
       type: Array,
     },
