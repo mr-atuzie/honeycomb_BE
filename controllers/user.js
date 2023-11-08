@@ -158,12 +158,13 @@ const registerUser = asyncHandler(async (req, res) => {
     // <a href=${resetLink} style="color: green; font-size: 16px;" clicktracking=off>Verify Email</a>
     const message = `
     
-    <h2>Hi ${user.firstname}</h2>
-    <p>welcome to Honey comb fxd farm</p>
+    <h2 style="color: gold;">Hi ${user.firstname}</h2>
+    <p style="color: gren;">welcome to Honey comb fxd farm</p>
+    <p style="color: green; font-size: 13px;">Empower your financial future with Honeycombfxd farm,Invest confidently, stay informed, and take control of your wealth, all in one place.</p>
    
     <p>Your email verification is</p>
    
-    <h1> ${verificationCode}</h1>
+    <h1 style="color: gren;"> ${verificationCode}</h1>
 
     <h5>Honey comb fxd farm</h5>
     `;
