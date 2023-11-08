@@ -157,14 +157,15 @@ const registerUser = asyncHandler(async (req, res) => {
     // const resetLink = `${process.env.FRONTEND_URL}/verify-email/${resetToken}`;
     // <a href=${resetLink} style="color: green; font-size: 16px;" clicktracking=off>Verify Email</a>
     const message = `
-    <p>You’re almost finished setting up your account</p>
+    
     <h2>Hi ${user.firstname}</h2>
-    <p>Let’s finish creating your account</p>
-    <p> Please take a moment to confirm your email address.</p>
-    <h6>Your verification code is</h6>
-    <h2> ${verificationCode}</h2>
+    <p>welcome to Honey comb fxd farm</p>
+   
+    <p>Your email verification is</p>
+   
+    <h1> ${verificationCode}</h1>
 
-    <h6>Honey comb fxd</h6>
+    <h5>Honey comb fxd farm</h5>
     `;
     const subject = "Email Confirmation";
     const send_to = user.email;
