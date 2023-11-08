@@ -66,7 +66,7 @@ const registerUser = asyncHandler(async (req, res) => {
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   function generateString(length) {
-    let result = " ";
+    let result = "";
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -75,7 +75,7 @@ const registerUser = asyncHandler(async (req, res) => {
     return result;
   }
 
-  const verificationCode = generateString(7);
+  const verificationCode = generateString(8);
 
   const user = await User.create({
     firstname,
@@ -218,7 +218,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
   //   throw new Error("Invalid or Expired Token.");
   // }
 
-  await User.findByIdAndUpdate(
+  const newUser = await User.findByIdAndUpdate(
     req.user._id,
     {
       $set: {
@@ -231,7 +231,9 @@ const verifyEmail = asyncHandler(async (req, res) => {
     }
   );
 
-  res.status(200).json("Email verification successfull");
+  res
+    .status(200)
+    .json({ msg: "Email verification successfull", user: newUser });
 });
 
 const loginUser = asyncHandler(async (req, res) => {

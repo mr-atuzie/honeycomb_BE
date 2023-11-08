@@ -8,9 +8,7 @@ router.route("/register").post(userController.registerUser);
 
 router.route("/login").post(userController.loginUser);
 
-router
-  .route("/verify-email/:resetToken")
-  .get(protect, userController.verifyEmail);
+router.route("/verify-email").post(protect, userController.verifyEmail);
 
 router.route("/investments").get(protect, userController.userInvestments);
 
