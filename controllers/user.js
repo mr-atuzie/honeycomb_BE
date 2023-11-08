@@ -825,7 +825,7 @@ const uploadPicture = asyncHandler(async (req, res) => {
 });
 
 const getContent = asyncHandler(async (req, res) => {
-  const content = await Content.findById("652c8c7a7ba8c309c3c8c005");
+  const content = await Content.findById(process.env.CONTENT);
   res.status(201).json(content);
 });
 
