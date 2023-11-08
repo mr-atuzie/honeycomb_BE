@@ -164,10 +164,8 @@ const heroContent = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Please fill up all required fields.");
   }
-
   const content = await Content.findByIdAndUpdate(
-    "652c8c7a7ba8c309c3c8c005",
-
+    process.env.CONTENT,
     {
       $set: { hero },
     },
@@ -176,6 +174,10 @@ const heroContent = asyncHandler(async (req, res) => {
       new: true,
     }
   );
+
+  // const content = await Content.create({
+  //   hero: hero,
+  // });
 
   if (content) {
     res.status(201).json(content);
@@ -194,8 +196,7 @@ const aboutContent = asyncHandler(async (req, res) => {
   }
 
   const content = await Content.findByIdAndUpdate(
-    "652c8c7a7ba8c309c3c8c005",
-
+    process.env.CONTENT,
     {
       $set: { about },
     },
@@ -222,7 +223,7 @@ const howContent = asyncHandler(async (req, res) => {
   }
 
   const content = await Content.findByIdAndUpdate(
-    "652c8c7a7ba8c309c3c8c005",
+    process.env.CONTENT,
 
     {
       $set: { how },
@@ -250,8 +251,7 @@ const valueContent = asyncHandler(async (req, res) => {
   }
 
   const content = await Content.findByIdAndUpdate(
-    "652c8c7a7ba8c309c3c8c005",
-
+    process.env.CONTENT,
     {
       $set: { value },
     },
