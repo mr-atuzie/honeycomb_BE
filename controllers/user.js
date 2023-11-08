@@ -158,15 +158,15 @@ const registerUser = asyncHandler(async (req, res) => {
     // <a href=${resetLink} style="color: green; font-size: 16px;" clicktracking=off>Verify Email</a>
     const message = `
     
-    <h2 style="color: gold;">Hi ${user.firstname}</h2>
-    <p style="color: gren;">welcome to Honey comb fxd farm</p>
-    <p style="color: green; font-size: 13px;">Empower your financial future with Honeycombfxd farm,Invest confidently, stay informed, and take control of your wealth, all in one place.</p>
+    <h2 style="color: green;">Welcome ${user.firstname}</h2>
+    
+    <p style="font-size: 13px;">Empower your financial future with Honeycombfxd farm,Invest confidently, stay informed, and take control of your wealth, all in one place.</p>
    
     <p>Your email verification is</p>
    
-    <h1 style="color: gren;"> ${verificationCode}</h1>
+    <h1 style="color: green;"> ${verificationCode}</h1>
 
-    <h5>Honey comb fxd farm</h5>
+    <h5 style="color: gold;">Honey comb fxd farm</h5>
     `;
     const subject = "Email Confirmation";
     const send_to = user.email;
