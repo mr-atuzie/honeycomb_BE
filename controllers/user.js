@@ -366,12 +366,17 @@ const forgetPassword = asyncHandler(async (req, res) => {
 const addDocument = asyncHandler(async (req, res) => {
   const { idType } = req.body;
 
+  let fileData = {};
+
   if (!idType) {
     res.status(400);
     throw new Error("Please fill up all required fields.");
   }
 
-  let fileData = {};
+  if (!req.file) {
+    res.status(400);
+    throw new Error("This file cannot be accepted");
+  }
 
   if (req.file) {
     let uploadedFile;
@@ -790,6 +795,11 @@ const filterTransactionsByMonth = asyncHandler(async (req, res) => {
 
 const uploadPicture = asyncHandler(async (req, res) => {
   let fileData = {};
+
+  if (!req.file) {
+    res.status(400);
+    throw new Error("This file cannot be accepted");
+  }
 
   if (req.file) {
     let uploadedFile;
