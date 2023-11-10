@@ -36,7 +36,7 @@ const getAllTransactions = asyncHandler(async (req, res) => {
 });
 
 const getAllUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({}).sort("-createdAt");
+  const users = await User.find({ admin: false }).sort("-createdAt");
 
   res.status(201).json({ result: users.length, users });
 });
