@@ -7,6 +7,7 @@ const Withdraw = require("../models/Withdraw");
 const Investment = require("../models/Investment");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Referral = require("../models/Referrals");
 
 const months = [
   "January",
@@ -438,6 +439,21 @@ const userTransactionHistory = asyncHandler(async (req, res) => {
   res.status(201).json({ result: transactions.length, transactions });
 });
 
+const referrals = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  const referrals = await Referral.find({
+    userId: user._id,
+  }).sort("-createdAt");
+
+  res.status(201).json({ result: referrals.length, referrals });
+});
+
 const userInvestments = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
@@ -643,4 +659,5 @@ module.exports = {
   registerAdmin,
   loginAdmin,
   highpayout,
+  referrals,
 };

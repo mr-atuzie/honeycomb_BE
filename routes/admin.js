@@ -89,6 +89,10 @@ router
   .get(protect, isAdmin, adminController.userInvestments);
 
 router
+  .route("/referrals/:id")
+  .get(protect, isAdmin, adminController.userInvestments);
+
+router
   .route("/delete-notification/:id")
   .delete(protect, isAdmin, adminController.deleteNotification);
 
