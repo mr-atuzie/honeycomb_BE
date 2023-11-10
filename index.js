@@ -22,7 +22,11 @@ app.use(bodyParser.json());
 // app.use(morgan("dev"));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://honeycombfxd.com"],
+    origin: [
+      "http://localhost:3000",
+      "https://honeycombfxd.com",
+      "https://honeycombfxd-admin.com",
+    ],
     credentials: true,
   })
 );
