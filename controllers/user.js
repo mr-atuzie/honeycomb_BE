@@ -594,7 +594,7 @@ const highRiskInvestment = asyncHandler(async (req, res) => {
   const payout = investmentReturn + intrestPerWeek;
 
   const currentBalance = user.accountBalance + amount;
-  const currentIntrest = user.intrest + payout * 3;
+  const currentIntrest = user.intrest + payout * 4;
 
   const newUser = await User.findByIdAndUpdate(
     req.user._id,
