@@ -517,7 +517,7 @@ const lowRiskInvestment = asyncHandler(async (req, res) => {
   const totalPayout = parseInt(amount) + payout;
 
   const currentBalance = user.accountBalance + parseInt(amount);
-  const currentIntrest = user.intrest + totalPayout;
+  const currentIntrest = user.intrest + payout;
 
   const newUser = await User.findByIdAndUpdate(
     req.user._id,
@@ -593,8 +593,8 @@ const highRiskInvestment = asyncHandler(async (req, res) => {
 
   const payout = investmentReturn + intrestPerWeek;
 
-  const currentBalance = user.accountBalance + amount;
-  const currentIntrest = user.intrest + payout * 4;
+  const currentBalance = user.accountBalance + amountAfterDeduct;
+  const currentIntrest = user.intrest + payout;
 
   const newUser = await User.findByIdAndUpdate(
     req.user._id,
@@ -615,6 +615,17 @@ const highRiskInvestment = asyncHandler(async (req, res) => {
     type: "credit",
     plan: type,
     amount,
+    date: Date.now(),
+    month,
+  });
+
+  await Transaction.create({
+    userId: user._id,
+    name,
+    email: user.email,
+    type: "Registration fee",
+    plan: type,
+    amount: regFee,
     date: Date.now(),
     month,
   });
