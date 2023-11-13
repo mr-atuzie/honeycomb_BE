@@ -380,8 +380,8 @@ const highpayout = asyncHandler(async (req, res) => {
   const duration = 7;
   const maturity = currentDate.setDate(currentDate.getDate() + duration);
 
-  // const currentBalance = payee.accountBalance - investment.payout;
-  const currentIntrest = payee.intrest - investment.payout;
+  const currentBalance = payee.accountBalance - investment.intrest;
+  const currentIntrest = payee.intrest - investment.intrest;
 
   await User.findByIdAndUpdate(
     payee._id,
