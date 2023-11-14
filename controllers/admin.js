@@ -322,7 +322,7 @@ const payout = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     payee._id,
     {
-      $set: { intrest: currentIntrest, accountBalance: currentBalance },
+      $set: { intrest: currentIntrest },
     },
     {
       new: true,
@@ -383,10 +383,13 @@ const highpayout = asyncHandler(async (req, res) => {
   const currentBalance = payee.accountBalance - investment.intrest;
   const currentIntrest = payee.intrest - investment.intrest;
 
+  //find week
+  const week = investment.weekpaid + 1;
+
   await User.findByIdAndUpdate(
     payee._id,
     {
-      $set: { accountBalance: currentBalance, intrest: currentIntrest },
+      $set: { intrest: currentIntrest },
     },
     {
       new: true,
@@ -419,6 +422,7 @@ const highpayout = asyncHandler(async (req, res) => {
         status: "",
         maturity: maturity,
         paid: paid,
+        week: week,
       },
     },
 

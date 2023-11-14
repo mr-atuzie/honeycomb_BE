@@ -100,17 +100,17 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // if user has a referral
   if (referral) {
-    const referredBy = await User.findById(referral);
+    const investment = await Investment.findById(referral);
 
-    if (!referredBy) {
+    if (!investment) {
       res.status(400);
       throw new Error("Invalid referral code");
     }
 
-    const bonus = referredBy.referralBonus + 500;
+    const bonus = investment.intrest * 0.02;
 
     await User.findByIdAndUpdate(
-      referral,
+      investment.userId,
       {
         $set: {
           referralBonus: bonus,
@@ -124,7 +124,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const name = `${user.firstname} ${user.lastname}`;
 
     await Referral.create({
-      userId: referredBy._id,
+      userId: investment.userId,
       name,
       referred: user._id,
       email: user.email,
@@ -576,7 +576,7 @@ const highRiskInvestment = asyncHandler(async (req, res) => {
 
   if (amount < 100000) {
     res.status(400);
-    throw new Error("Minimum amount for investment is 100,000");
+    throw new Error("Minimum amount for investment is 100,000 naira");
   }
 
   //Find Pay out date
@@ -655,6 +655,98 @@ const highRiskInvestment = asyncHandler(async (req, res) => {
   // }
 });
 
+const reInvest = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const investment = await Investment.findById(req.params.id);
+  const { amount } = req.body;
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  if (!investment) {
+    res.status(400);
+    throw new Error("Unable to find plan");
+  }
+
+  if (!amount) {
+    res.status(400);
+    throw new Error("Unable to complete transaction");
+  }
+
+  if (amount < 100000) {
+    res.status(400);
+    throw new Error("Minimum amount for investment is 100,000 naira");
+  }
+
+  //Find Pay out date
+  const currentDate = new Date();
+  const duration = 7;
+  const maturity = currentDate.setDate(currentDate.getDate() + duration);
+
+  const intrestPerWeek = parseInt(amount) * 0.15;
+  const investmentReturn = parseInt(amount) / 4;
+
+  const payout = investmentReturn + intrestPerWeek;
+
+  const currentBalance = user.accountBalance + parseInt(amount);
+  const currentIntrest = user.intrest + payout;
+
+  const newUser = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: { accountBalance: currentBalance, intrest: currentIntrest },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const name = `${user.firstname} ${user.lastname}`;
+
+  const transaction = await Transaction.create({
+    userId: user._id,
+    name,
+    email: user.email,
+    type: "credit",
+    plan: investment.type,
+    amount,
+    date: Date.now(),
+    month,
+  });
+
+  const newAmount = investment.amount + parseInt(amount);
+  const newIntrestPerWeek = investment.intrest + intrestPerWeek;
+  const newPayout = investment.payout + payout;
+
+  const currentInvestment = await Investment.findByIdAndUpdate(
+    investment._id,
+    {
+      $set: {
+        amount: newAmount,
+        intrest: newIntrestPerWeek,
+        payout: newPayout,
+        maturity: maturity,
+        reinvest: true,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  res.status(201).json({
+    newUser,
+    currentInvestment,
+    investment,
+    newAmount,
+    newIntrestPerWeek,
+    newPayout,
+    transaction,
+  });
+});
+
 const withdraw = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   const id = req.params.id;
@@ -675,6 +767,42 @@ const withdraw = asyncHandler(async (req, res) => {
     investment._id,
     {
       $set: { status: "withdraw" },
+    },
+    {
+      new: true,
+    }
+  );
+
+  if (transaction) {
+    res.status(201).json(transaction);
+  } else {
+    res.status(400);
+    throw new Error("Transaction failed");
+  }
+});
+
+const finalWithdraw = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const id = req.params.id;
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  const investment = await Investment.findById(id);
+
+  const finalpayout = investment.intrest / 2;
+
+  if (!investment) {
+    res.status(400);
+    throw new Error("Not allowed");
+  }
+
+  const transaction = await Investment.findByIdAndUpdate(
+    investment._id,
+    {
+      $set: { status: "withdraw", payout: finalpayout },
     },
     {
       new: true,
@@ -884,9 +1012,11 @@ module.exports = {
   userReferrals,
   getNotification,
   getContent,
+  reInvest,
   highRiskInvestment,
   userInvestments,
   userInvestment,
   forgetPassword,
   logout,
+  finalWithdraw,
 };

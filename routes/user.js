@@ -40,7 +40,11 @@ router
   .route("/high-risk-investment")
   .post(protect, userController.highRiskInvestment);
 
+router.route("/reinvest/:id").post(protect, userController.reInvest);
+
 router.route("/withdraw/:id").get(protect, userController.withdraw);
+
+router.route("/final-withdraw/:id").get(protect, userController.finalWithdraw);
 
 router.route("/investment/:id").get(protect, userController.userInvestment);
 

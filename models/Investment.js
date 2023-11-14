@@ -37,6 +37,14 @@ const investmentSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    week: {
+      type: Number,
+      default: 0,
+    },
+    reinvest: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
