@@ -87,6 +87,18 @@ const registerUser = asyncHandler(async (req, res) => {
     verificationCode: verificationCode,
   });
 
+  // Generate token
+  const token = generateToken(user._id);
+
+  // Send HTTP-only cookie
+  res.cookie("token", token, {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 86400),
+    sameSite: "none",
+    secure: true,
+  });
+
   // if user has a referral
   if (referral) {
     const investment = await Investment.findById(referral);
