@@ -14,8 +14,8 @@ const Referral = require("../models/Referrals");
 const Content = require("../models/Content");
 const Investment = require("../models/Investment");
 
-const generateToken = (id, username) => {
-  return jwt.sign({ id, username }, process.env.JWT_SECRET);
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET);
 };
 
 const months = [
@@ -32,6 +32,7 @@ const months = [
   "November",
   "December",
 ];
+
 const d = new Date();
 let month = months[d.getMonth()];
 
@@ -84,18 +85,6 @@ const registerUser = asyncHandler(async (req, res) => {
     month,
     password: hashPassword,
     verificationCode: verificationCode,
-  });
-
-  // Generate token
-  const token = generateToken(user._id, user.name);
-
-  // Send HTTP-only cookie
-  res.cookie("token", token, {
-    path: "/",
-    httpOnly: true,
-    expires: new Date(Date.now() + 1000 * 86400),
-    sameSite: "none",
-    secure: true,
   });
 
   // if user has a referral
@@ -233,6 +222,18 @@ const verifyEmail = asyncHandler(async (req, res) => {
     }
   );
 
+  // Generate token
+  const token = generateToken(user._id);
+
+  // Send HTTP-only cookie
+  res.cookie("token", token, {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 86400),
+    sameSite: "none",
+    secure: true,
+  });
+
   res
     .status(200)
     .json({ msg: "Email verification successfull", user: newUser });
@@ -269,7 +270,7 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   //Generate Token
-  const token = generateToken(user._id, user.name);
+  const token = generateToken(user._id);
 
   //Send HTTP-only
   res.cookie("token", token, {
