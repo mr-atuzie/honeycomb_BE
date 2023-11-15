@@ -158,13 +158,12 @@ const registerUser = asyncHandler(async (req, res) => {
     // const resetLink = `${process.env.FRONTEND_URL}/verify-email/${resetToken}`;
     // <a href=${resetLink} style="color: green; font-size: 16px;" clicktracking=off>Verify Email</a>
     const message = `
-    
-    <h2 style="color: green;">Welcome ${user.firstname}</h2>
-    
+    <h2 >Hi ${user.firstname}</h2>
+
+    <h4 style="color: green;">Welcome to Honeycombfxd Farm</h4>
     <p style="font-size: 13px;">Empower your financial future with Honeycombfxd farm,Invest confidently, stay informed, and take control of your wealth, all in one place.</p>
    
-    <p>Your email verification is</p>
-   
+    <p>Your email verification code is</p>
     <h1 style="color: green;"> ${verificationCode}</h1>
 
     <h5 style="color: gold;">Honey comb fxd farm</h5>
