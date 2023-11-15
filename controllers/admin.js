@@ -386,15 +386,15 @@ const highpayout = asyncHandler(async (req, res) => {
   //find week
   const week = investment.weekpaid + 1;
 
-  await User.findByIdAndUpdate(
-    payee._id,
-    {
-      $set: { intrest: currentIntrest },
-    },
-    {
-      new: true,
-    }
-  );
+  // await User.findByIdAndUpdate(
+  //   payee._id,
+  //   {
+  //     $set: { intrest: currentIntrest },
+  //   },
+  //   {
+  //     new: true,
+  //   }
+  // );
 
   const name = `Admin-${payer.firstname} ${payer.lastname}`;
 
