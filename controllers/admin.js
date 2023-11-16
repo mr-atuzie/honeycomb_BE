@@ -198,6 +198,27 @@ const updateNotification = asyncHandler(async (req, res) => {
   res.status(201).json(newNotification);
 });
 
+const activateInvestment = asyncHandler(async (req, res) => {
+  const investment = await Investment.findById(req.params.id);
+
+  if (!investment) {
+    res.status(404);
+    throw new Error("Not found ");
+  }
+
+  const newinvestment = await Investment.findByIdAndUpdate(
+    req.params.id,
+
+    { $set: { activated: true } },
+
+    {
+      new: true,
+    }
+  );
+
+  res.status(201).json({ investment: newinvestment });
+});
+
 const heroContent = asyncHandler(async (req, res) => {
   const { hero } = req.body;
 
