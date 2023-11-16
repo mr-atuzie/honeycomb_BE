@@ -20,6 +20,9 @@ const investmentSchema = new mongoose.Schema(
     amount: {
       type: Number,
     },
+    regFee: {
+      type: Number,
+    },
     intrest: {
       type: Number,
     },
@@ -42,6 +45,10 @@ const investmentSchema = new mongoose.Schema(
       default: 0,
     },
     reinvest: {
+      type: Boolean,
+      default: false,
+    },
+    activated: {
       type: Boolean,
       default: false,
     },

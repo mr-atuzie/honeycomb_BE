@@ -531,28 +531,28 @@ const lowRiskInvestment = asyncHandler(async (req, res) => {
   const currentBalance = user.accountBalance + parseInt(amount);
   const currentIntrest = user.intrest + payout;
 
-  const newUser = await User.findByIdAndUpdate(
-    req.user._id,
-    {
-      $set: { accountBalance: currentBalance, intrest: currentIntrest },
-    },
-    {
-      new: true,
-    }
-  );
+  // const newUser = await User.findByIdAndUpdate(
+  //   req.user._id,
+  //   {
+  //     $set: { accountBalance: currentBalance, intrest: currentIntrest },
+  //   },
+  //   {
+  //     new: true,
+  //   }
+  // );
 
   const name = `${user.firstname} ${user.lastname}`;
 
-  const transaction = await Transaction.create({
-    userId: user._id,
-    name,
-    email: user.email,
-    type: "credit",
-    plan: type,
-    amount,
-    date: Date.now(),
-    month,
-  });
+  // const transaction = await Transaction.create({
+  //   userId: user._id,
+  //   name,
+  //   email: user.email,
+  //   type: "credit",
+  //   plan: type,
+  //   amount,
+  //   date: Date.now(),
+  //   month,
+  // });
 
   const investment = await Investment.create({
     userId: user._id,
@@ -566,9 +566,9 @@ const lowRiskInvestment = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json({
-    newUser,
+    // newUser,
     investment,
-    transaction,
+    // transaction,
   });
 });
 
@@ -608,55 +608,56 @@ const highRiskInvestment = asyncHandler(async (req, res) => {
   const currentBalance = user.accountBalance + amountAfterDeduct;
   const currentIntrest = user.intrest + payout;
 
-  const newUser = await User.findByIdAndUpdate(
-    req.user._id,
-    {
-      $set: { accountBalance: currentBalance, intrest: currentIntrest },
-    },
-    {
-      new: true,
-    }
-  );
+  // const newUser = await User.findByIdAndUpdate(
+  //   req.user._id,
+  //   {
+  //     $set: { accountBalance: currentBalance, intrest: currentIntrest },
+  //   },
+  //   {
+  //     new: true,
+  //   }
+  // );
 
   const name = `${user.firstname} ${user.lastname}`;
 
-  const transaction = await Transaction.create({
-    userId: user._id,
-    name,
-    email: user.email,
-    type: "credit",
-    plan: type,
-    amount,
-    date: Date.now(),
-    month,
-  });
+  // const transaction = await Transaction.create({
+  //   userId: user._id,
+  //   name,
+  //   email: user.email,
+  //   type: "credit",
+  //   plan: type,
+  //   amount,
+  //   date: Date.now(),
+  //   month,
+  // });
 
-  await Transaction.create({
-    userId: user._id,
-    name,
-    email: user.email,
-    type: "registration fee",
-    plan: type,
-    amount: regFee,
-    date: Date.now(),
-    month,
-  });
+  // await Transaction.create({
+  //   userId: user._id,
+  //   name,
+  //   email: user.email,
+  //   type: "registration fee",
+  //   plan: type,
+  //   amount: regFee,
+  //   date: Date.now(),
+  //   month,
+  // });
 
   const investment = await Investment.create({
     userId: user._id,
     name,
     email: user.email,
     type,
-    amount: amountAfterDeduct,
+    amount,
     intrest: intrestPerWeek,
     payout,
     maturity,
+    regFee,
   });
 
   res.status(201).json({
-    newUser,
+    // newUser,
     investment,
-    transaction,
+    // transaction,
   });
 
   // if (transaction) {
