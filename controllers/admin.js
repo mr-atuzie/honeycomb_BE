@@ -750,4 +750,5 @@ module.exports = {
   referrals,
   getInvestments,
   filterInvestmentsByMonth,
+  activateInvestment,
 };

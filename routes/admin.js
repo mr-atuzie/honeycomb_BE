@@ -33,6 +33,10 @@ router
   .get(protect, isAdmin, adminController.totalIntrest);
 
 router
+  .route("/activate/:id")
+  .get(protect, isAdmin, adminController.activateInvestment);
+
+router
   .route("/total-referrals")
   .get(protect, isAdmin, adminController.totalReferrals);
 
