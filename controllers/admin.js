@@ -42,6 +42,12 @@ const getAllUsers = asyncHandler(async (req, res) => {
   res.status(201).json({ result: users.length, users });
 });
 
+const getInvestments = asyncHandler(async (req, res) => {
+  const investments = await Investment.find({}).sort("-createdAt");
+
+  res.status(201).json({ result: investments.length, investments });
+});
+
 const getInvestment = asyncHandler(async (req, res) => {
   const investment = await Investment.findById(req.params.id);
 
@@ -701,4 +707,5 @@ module.exports = {
   loginAdmin,
   highpayout,
   referrals,
+  getInvestments,
 };
