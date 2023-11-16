@@ -471,6 +471,26 @@ const filterTransactionsByMonth = asyncHandler(async (req, res) => {
   res.status(201).json(transactions);
 });
 
+const filterInvestmentsByMonth = asyncHandler(async (req, res) => {
+  const { month } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  if (!month) {
+    res.status(400);
+    throw new Error("Please enter month");
+  }
+
+  const transactions = await Investment.find({ userId: user._id, month });
+
+  res.status(201).json(transactions);
+});
+
 const userTransactionHistory = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
@@ -708,4 +728,5 @@ module.exports = {
   highpayout,
   referrals,
   getInvestments,
+  filterInvestmentsByMonth,
 };

@@ -49,6 +49,10 @@ router
   .post(protect, isAdmin, adminController.filterTransactionsByMonth);
 
 router
+  .route("/filter-investments-month")
+  .post(protect, isAdmin, adminController.filterInvestmentsByMonth);
+
+router
   .route("/filter-user-month")
   .post(protect, isAdmin, adminController.filterUserByMonth);
 
