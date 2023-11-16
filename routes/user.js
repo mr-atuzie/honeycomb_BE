@@ -60,6 +60,10 @@ router
   .route("/filter-transactions-month")
   .post(protect, userController.filterTransactionsByMonth);
 
+router
+  .route("/filter-investment-month")
+  .post(protect, userController.filterInvestmentsByMonth);
+
 router.route("/notifications").get(protect, userController.getNotifications);
 
 router.route("/notification/:id").get(protect, userController.getNotification);

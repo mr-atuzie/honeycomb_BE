@@ -563,6 +563,7 @@ const lowRiskInvestment = asyncHandler(async (req, res) => {
     intrest: intrestPerMonth,
     payout,
     maturity,
+    month,
   });
 
   res.status(201).json({
@@ -652,6 +653,7 @@ const highRiskInvestment = asyncHandler(async (req, res) => {
     payout,
     maturity,
     regFee,
+    month,
   });
 
   res.status(201).json({
@@ -946,6 +948,26 @@ const filterTransactionsByMonth = asyncHandler(async (req, res) => {
   res.status(201).json(transactions);
 });
 
+const filterInvestmentsByMonth = asyncHandler(async (req, res) => {
+  const { month } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please signup");
+  }
+
+  if (!month) {
+    res.status(400);
+    throw new Error("Please enter month");
+  }
+
+  const transactions = await Investment.find({ userId: user._id, month });
+
+  res.status(201).json(transactions);
+});
+
 const uploadPicture = asyncHandler(async (req, res) => {
   let fileData = {};
 
@@ -1032,4 +1054,5 @@ module.exports = {
   forgetPassword,
   logout,
   finalWithdraw,
+  filterInvestmentsByMonth,
 };

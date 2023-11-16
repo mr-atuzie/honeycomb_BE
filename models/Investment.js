@@ -52,6 +52,9 @@ const investmentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    month: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
