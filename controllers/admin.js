@@ -486,7 +486,7 @@ const filterInvestmentsByMonth = asyncHandler(async (req, res) => {
     throw new Error("Please enter month");
   }
 
-  const transactions = await Investment.find({ userId: user._id, month });
+  const transactions = await Investment.find({ month });
 
   res.status(201).json(transactions);
 });
