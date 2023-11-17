@@ -48,6 +48,8 @@ router
   .route("/investment/:id")
   .get(protect, isAdmin, adminController.getInvestment);
 
+router.route("/close/:id").get(protect, isAdmin, adminController.close);
+
 router
   .route("/filter-transactions-month")
   .post(protect, isAdmin, adminController.filterTransactionsByMonth);
@@ -82,11 +84,11 @@ router.route("/how").put(protect, isAdmin, adminController.howContent);
 
 router.route("/value").put(protect, isAdmin, adminController.valueContent);
 
-router.route("/payout/:id").get(protect, isAdmin, adminController.payout);
+router.route("/payout/:id").put(protect, isAdmin, adminController.payout);
 
 router
   .route("/high-payout/:id")
-  .get(protect, isAdmin, adminController.highpayout);
+  .put(protect, isAdmin, adminController.highpayout);
 
 router
   .route("/update-notification/:id")

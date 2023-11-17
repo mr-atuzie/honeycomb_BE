@@ -564,6 +564,7 @@ const lowRiskInvestment = asyncHandler(async (req, res) => {
     payout,
     maturity,
     month,
+    duration,
   });
 
   res.status(201).json({

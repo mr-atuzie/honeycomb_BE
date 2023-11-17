@@ -216,7 +216,18 @@ const activateInvestment = asyncHandler(async (req, res) => {
     }
   );
 
-  res.status(201).json({ investment: newinvestment });
+  const transaction = await Transaction.create({
+    userId: investment._id,
+    name: investment.name,
+    email: investment.email,
+    type: "credit",
+    plan: investment.type,
+    amount,
+    date: Date.now(),
+    month,
+  });
+
+  res.status(201).json({ investment: newinvestment, transaction });
 });
 
 const heroContent = asyncHandler(async (req, res) => {
@@ -338,26 +349,29 @@ const payout = asyncHandler(async (req, res) => {
   const payer = await User.findById(req.user._id);
   const payee = await User.findById(investment.userId);
 
+  const { amount } = req.body;
+
   if (!investment) {
     res.status(400);
     throw new Error("Unable to complete transaction");
   }
 
+  const newAmount = parseInt(amount);
   const currentIntrest = payee.intrest - investment.intrest;
   const currentBalance = payee.accountBalance - investment.intrest;
-
-  await User.findByIdAndUpdate(
-    payee._id,
-    {
-      $set: { intrest: currentIntrest },
-    },
-    {
-      new: true,
-    }
-  );
-
-  const name = `Admin-${payer.firstname} ${payer.lastname}`;
   const payout = investment.payout + investment.amount;
+
+  // await User.findByIdAndUpdate(
+  //   payee._id,
+  //   {
+  //     $set: { intrest: currentIntrest },
+  //   },
+  //   {
+  //     new: true,
+  //   }
+  // );
+
+  // const name = `Admin-${payer.firstname} ${payer.lastname}`;
 
   const transaction = await Transaction.create({
     userId: payee._id,
@@ -365,7 +379,7 @@ const payout = asyncHandler(async (req, res) => {
     email: payer.email,
     type: "payout",
     plan: investment.type,
-    amount: payout,
+    amount: newAmount,
     date: Date.now(),
     month: month,
   });
@@ -375,7 +389,7 @@ const payout = asyncHandler(async (req, res) => {
     {
       $set: {
         status: "approved",
-        paid: payout,
+        paid: newAmount,
       },
     },
 
@@ -384,18 +398,16 @@ const payout = asyncHandler(async (req, res) => {
     }
   );
 
-  if (transaction) {
-    res.status(201).json(transaction);
-  } else {
-    res.status(400);
-    throw new Error("Transaction failed");
-  }
+  res.status(201).json("payout successfull");
 });
 
 const highpayout = asyncHandler(async (req, res) => {
   const investment = await Investment.findById(req.params.id);
   const payer = await User.findById(req.user._id);
   const payee = await User.findById(investment.userId);
+  const { amount } = req.body;
+
+  const newAmount = parseInt(amount);
 
   if (!investment) {
     res.status(400);
@@ -427,20 +439,19 @@ const highpayout = asyncHandler(async (req, res) => {
 
   const payout = investment.payout;
 
-  const transaction = await Transaction.create({
+  await Transaction.create({
     userId: payee._id,
     name,
     email: payer.email,
     type: "payout",
     plan: investment.type,
-    amount: payout,
+    amount: newAmount,
     date: Date.now(),
     month: month,
   });
 
   // //Update Withdraw
-  // const withdrawReq = await Withdraw.find({ userId: payee._id });#
-  const paid = investment.paid + payout;
+  // const paid = investment.paid + payout;
 
   await Investment.findByIdAndUpdate(
     investment._id,
@@ -448,7 +459,7 @@ const highpayout = asyncHandler(async (req, res) => {
       $set: {
         status: "",
         maturity: maturity,
-        paid: paid,
+        paid: newAmount,
         week: week,
       },
     },
@@ -458,12 +469,31 @@ const highpayout = asyncHandler(async (req, res) => {
     }
   );
 
-  if (transaction) {
-    res.status(201).json(transaction);
-  } else {
+  res.status(201).json("Payout successfull");
+});
+
+const close = asyncHandler(async (req, res) => {
+  const investment = await Investment.findById(req.params.id);
+
+  if (!investment) {
     res.status(400);
-    throw new Error("Transaction failed");
+    throw new Error("Unable to complete transaction");
   }
+
+  await Investment.findByIdAndUpdate(
+    investment._id,
+    {
+      $set: {
+        status: "approved",
+      },
+    },
+
+    {
+      new: true,
+    }
+  );
+
+  res.status(201).json("Investment approved successfull");
 });
 
 const filterUserByMonth = asyncHandler(async (req, res) => {
@@ -735,6 +765,7 @@ module.exports = {
   howContent,
   valueContent,
   getInvestment,
+  close,
   payout,
   filterTransactionsByMonth,
   filterUserByMonth,

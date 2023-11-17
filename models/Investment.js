@@ -36,6 +36,10 @@ const investmentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    duration: {
+      type: String,
+      default: "",
+    },
     paid: {
       type: Number,
       default: 0,

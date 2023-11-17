@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    profit: {
+      type: Number,
+      default: 0,
+    },
     referralBonus: {
       type: Number,
       default: 0,
