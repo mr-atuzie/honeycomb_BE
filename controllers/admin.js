@@ -436,7 +436,7 @@ const highpayout = asyncHandler(async (req, res) => {
   );
 
   //find week
-  const week = investment.weekpaid + 1;
+  const week = investment.week + 1;
 
   const name = `Admin-${payer.firstname} ${payer.lastname}`;
 
