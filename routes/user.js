@@ -12,6 +12,8 @@ router.route("/verify-email").post(protect, userController.verifyEmail);
 
 router.route("/investments").get(protect, userController.userInvestments);
 
+router.route("/profit").get(protect, userController.profit);
+
 router.route("/content").get(userController.getContent);
 
 router

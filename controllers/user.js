@@ -1030,6 +1030,19 @@ const logout = asyncHandler(async (req, res) => {
   });
 });
 
+const profit = asyncHandler(async (req, res) => {
+  const totalIntrest = await Investment.aggregate([
+    {
+      $group: {
+        _id: 1,
+        totalIntrest: { $sum: "$paid" },
+      },
+    },
+  ]);
+
+  res.status(201).json(...totalIntrest);
+});
+
 module.exports = {
   registerUser,
   verifyEmail,
@@ -1056,4 +1069,5 @@ module.exports = {
   logout,
   finalWithdraw,
   filterInvestmentsByMonth,
+  profit,
 };

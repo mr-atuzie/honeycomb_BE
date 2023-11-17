@@ -356,20 +356,21 @@ const payout = asyncHandler(async (req, res) => {
     throw new Error("Unable to complete transaction");
   }
 
-  const newAmount = parseInt(amount);
   const currentIntrest = payee.intrest - investment.intrest;
   const currentBalance = payee.accountBalance - investment.intrest;
   const payout = investment.payout + investment.amount;
+  const newAmount = parseInt(amount);
+  const profit = payee.profit + newAmount;
 
-  // await User.findByIdAndUpdate(
-  //   payee._id,
-  //   {
-  //     $set: { intrest: currentIntrest },
-  //   },
-  //   {
-  //     new: true,
-  //   }
-  // );
+  await User.findByIdAndUpdate(
+    payee._id,
+    {
+      $set: { profit: profit },
+    },
+    {
+      new: true,
+    }
+  );
 
   // const name = `Admin-${payer.firstname} ${payer.lastname}`;
 
@@ -422,18 +423,20 @@ const highpayout = asyncHandler(async (req, res) => {
   const currentBalance = payee.accountBalance - investment.intrest;
   const currentIntrest = payee.intrest - investment.intrest;
 
+  const profit = payee.profit + newAmount;
+
+  await User.findByIdAndUpdate(
+    payee._id,
+    {
+      $set: { profit: profit },
+    },
+    {
+      new: true,
+    }
+  );
+
   //find week
   const week = investment.weekpaid + 1;
-
-  // await User.findByIdAndUpdate(
-  //   payee._id,
-  //   {
-  //     $set: { intrest: currentIntrest },
-  //   },
-  //   {
-  //     new: true,
-  //   }
-  // );
 
   const name = `Admin-${payer.firstname} ${payer.lastname}`;
 
