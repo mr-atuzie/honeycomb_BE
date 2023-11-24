@@ -602,7 +602,7 @@ const highRiskInvestment = asyncHandler(async (req, res) => {
   const regFee = parseInt(amount) * 0.05;
   const amountAfterDeduct = parseInt(amount) - regFee;
 
-  const intrestPerWeek = amountAfterDeduct * 0.15;
+  const intrestPerWeek = amountAfterDeduct * 0.05;
   const investmentReturn = amountAfterDeduct / 4;
 
   const payout = investmentReturn + intrestPerWeek;

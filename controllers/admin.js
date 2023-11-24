@@ -360,6 +360,7 @@ const payout = asyncHandler(async (req, res) => {
   const currentBalance = payee.accountBalance - investment.intrest;
   const payout = investment.payout + investment.amount;
   const newAmount = parseInt(amount);
+
   const profit = payee.profit + newAmount;
 
   await User.findByIdAndUpdate(
