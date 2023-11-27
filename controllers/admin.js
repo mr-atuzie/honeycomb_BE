@@ -222,7 +222,7 @@ const activateInvestment = asyncHandler(async (req, res) => {
     email: investment.email,
     type: "credit",
     plan: investment.type,
-    amount,
+    amount: investment.amount,
     date: Date.now(),
     month,
   });
