@@ -92,25 +92,7 @@ const approveKyc = asyncHandler(async (req, res) => {
     }
   );
 
-  const message = `
-    
-    <h2 style="color: green;">Welcome ${user.firstname}</h2>
-    
-    <p style="font-size: 13px;">Your Kyc has been approved.</p>
-   
-    <h5 style="color: gold;">Honey comb fxd farm</h5>
-    `;
-  const subject = "Kyc Approved";
-  const send_to = user.email;
-  const send_from = process.env.EMAIL_USER;
-
-  try {
-    await sendEmail(subject, message, send_to, send_from);
-    res.status(201).json({ newuser });
-  } catch (error) {
-    res.status(500);
-    throw new Error("Email not sent , Please try Again.");
-  }
+  res.status(201).json({ newuser });
 });
 
 const disapproveKyc = asyncHandler(async (req, res) => {
@@ -126,25 +108,7 @@ const disapproveKyc = asyncHandler(async (req, res) => {
     }
   );
 
-  const message = `
-    
-    <h2 style="color: green;">Welcome ${user.firstname}</h2>
-    
-    <p style="font-size: 13px;">Invalid Kyc, Please uploaded again</p>
-   
-    <h5 style="color: gold;">Honey comb fxd farm</h5>
-    `;
-  const subject = "Invalid KYC";
-  const send_to = user.email;
-  const send_from = process.env.EMAIL_USER;
-
-  try {
-    await sendEmail(subject, message, send_to, send_from);
-    res.status(201).json({ newuser });
-  } catch (error) {
-    res.status(500);
-    throw new Error("Email not sent , Please try Again.");
-  }
+  res.status(201).json({ newuser });
 });
 
 const addNotification = asyncHandler(async (req, res) => {
