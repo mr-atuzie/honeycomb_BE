@@ -28,7 +28,7 @@ router.route("/login-status").get(userController.loginStatus);
 
 router.route("/update-user").patch(protect, userController.updateUser);
 
-router.route("/forgot-password").patch(protect, userController.forgetPassword);
+router.route("/forgot-password").patch(userController.forgetPassword);
 
 router.route("/").get(protect, userController.getUser);
 
